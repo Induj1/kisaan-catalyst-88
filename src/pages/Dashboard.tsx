@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import ChatbotWidget from '@/components/ChatbotWidget';
 import LiveDataWidget from '@/components/LiveDataWidget';
 import MapPlanner from '@/components/MapPlanner';
 import LocationAccessPopup from '@/components/LocationAccessPopup';
-import { Cloud, Tractor, Map, BarChart4, Lightbulb } from 'lucide-react';
+import { Cloud, Tractor, Map, BarChart4, Lightbulb, ShoppingCart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Dashboard = () => {
@@ -26,8 +27,24 @@ const Dashboard = () => {
   const [isHighContrast, setIsHighContrast] = useState(false);
   const [language, setLanguage] = useState<'english' | 'hindi' | 'kannada'>('hindi');
   const [creditScore, setCreditScore] = useState(650); // Default credit score
+  const [farmerProfile, setFarmerProfile] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
+    // If location not already granted, check if we can get it
+    if (!locationGranted && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLatitude(position.coords.latitude);
+          setLongitude(position.coords.longitude);
+          setLocationGranted(true);
+        },
+        (error) => {
+          console.log("Geolocation error or permission denied:", error);
+        }
+      );
+    }
+    
     // If it's a new user, show the location popup
     if (isNewUser) {
       setShowLocationPopup(true);
@@ -35,23 +52,24 @@ const Dashboard = () => {
       setIsNewUser(false);
     }
 
-    // Fetch credit score for the user if they are logged in
-    const fetchCreditScore = async () => {
+    // Fetch profile data for the user if they are logged in
+    const fetchProfileData = async () => {
       if (user) {
         const { data, error } = await supabase
           .from('farmer_profiles')
-          .select('credit_score')
+          .select('*')
           .eq('user_id', user.id)
           .single();
           
         if (!error && data) {
           setCreditScore(data.credit_score);
+          setFarmerProfile(data);
         }
       }
     };
     
-    fetchCreditScore();
-  }, [isNewUser, setIsNewUser, user]);
+    fetchProfileData();
+  }, [isNewUser, setIsNewUser, user, refreshKey]);
 
   const toggleContrast = () => {
     setIsHighContrast(!isHighContrast);
@@ -62,6 +80,10 @@ const Dashboard = () => {
     setLatitude(lat);
     setLongitude(lng);
     setLocationGranted(true);
+  };
+  
+  const handleProfileRefresh = () => {
+    setRefreshKey(prev => prev + 1);
   };
 
   return (
@@ -108,7 +130,12 @@ const Dashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <LiveDataWidget widgetType="weather" language={language} />
+                <LiveDataWidget 
+                  widgetType="weather" 
+                  language={language}
+                  latitude={latitude}
+                  longitude={longitude}
+                />
               </CardContent>
             </Card>
 
@@ -168,9 +195,41 @@ const Dashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <LiveDataWidget widgetType="mandi" language={language} />
+                <LiveDataWidget 
+                  widgetType="mandi" 
+                  language={language}
+                  latitude={latitude}
+                  longitude={longitude}
+                />
               </CardContent>
             </Card>
+          </div>
+
+          <div className="mb-6">
+            <Link to="/marketplace">
+              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-800 hover:shadow-md transition-shadow">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center">
+                    <ShoppingCart className="mr-3 text-purple-600" size={24} />
+                    <div>
+                      <h3 className="font-semibold text-lg text-purple-700 dark:text-purple-300">
+                        {language === 'english' ? 'Farmer Marketplace' : language === 'hindi' ? 'किसान बाज़ार' : 'ರೈತ ಮಾರುಕಟ್ಟೆ'}
+                      </h3>
+                      <p className="text-sm text-purple-600 dark:text-purple-400">
+                        {language === 'english' 
+                          ? 'Buy and sell agricultural products directly' 
+                          : language === 'hindi' 
+                            ? 'कृषि उत्पादों को सीधे खरीदें और बेचें' 
+                            : 'ಕೃಷಿ ಉತ್ಪನ್ನಗಳನ್ನು ನೇರವಾಗಿ ಖರೀದಿಸಿ ಮತ್ತು ಮಾರಾಟ ಮಾಡಿ'}
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="outline" className="bg-white dark:bg-gray-800">
+                    {language === 'english' ? 'Visit' : language === 'hindi' ? 'जाएँ' : 'ಭೇಟಿ ನೀಡಿ'}
+                  </Button>
+                </CardContent>
+              </Card>
+            </Link>
           </div>
 
           <Tabs defaultValue="profile" className="w-full">
@@ -191,9 +250,12 @@ const Dashboard = () => {
                 <FarmerProfile 
                   user={user} 
                   mode="edit" 
-                  onProfileUpdated={() => {}} 
+                  onProfileUpdated={handleProfileRefresh} 
                 />
-                <CreditTracker />
+                <CreditTracker 
+                  creditScore={creditScore}
+                  onRefresh={handleProfileRefresh}
+                />
               </div>
             </TabsContent>
 

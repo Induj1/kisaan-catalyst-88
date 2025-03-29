@@ -14,6 +14,7 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
 import FarmPlanner from "./pages/FarmPlanner";
+import Marketplace from "./pages/Marketplace";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <FarmPlanner />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/marketplace" 
+        element={
+          <ProtectedRoute>
+            <Marketplace />
           </ProtectedRoute>
         } 
       />

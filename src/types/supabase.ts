@@ -1,5 +1,6 @@
 
 import { Database as OriginalDatabase } from '@/integrations/supabase/types';
+import { createClient } from '@supabase/supabase-js';
 
 // Extend the original Database type with our new tables
 export interface Database extends OriginalDatabase {
@@ -83,7 +84,15 @@ export interface Database extends OriginalDatabase {
           product_title?: string | null;
           created_at?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_transactions_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "marketplace_listings";
+            referencedColumns: ["id"];
+          }
+        ];
       };
     };
     Views: OriginalDatabase['public']['Views'];

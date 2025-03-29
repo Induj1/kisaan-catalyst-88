@@ -57,7 +57,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ profile, onProfileUpdate })
       phone: profile?.phone || '',
       location: profile?.location || '',
       crop_type: profile?.crop_type || '',
-      land_size: profile?.land_size ? profile.land_size.toString() : '1',
+      land_size: profile?.land_size ? profile.land_size.toString() : '1', // Fix: Convert number to string
     },
   });
 

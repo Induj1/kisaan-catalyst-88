@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +61,19 @@ const UserSettings: React.FC<UserSettingsProps> = ({ profile, onProfileUpdate })
     },
   });
 
+  // Update form values when profile changes
+  React.useEffect(() => {
+    if (profile) {
+      form.reset({
+        name: profile.name || '',
+        phone: profile.phone || '',
+        location: profile.location || '',
+        crop_type: profile.crop_type || '',
+        land_size: profile.land_size ? profile.land_size.toString() : '1',
+      });
+    }
+  }, [profile, form]);
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!user) return;
     
@@ -99,6 +113,14 @@ const UserSettings: React.FC<UserSettingsProps> = ({ profile, onProfileUpdate })
       setIsLoading(false);
     }
   };
+
+  if (!profile) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">

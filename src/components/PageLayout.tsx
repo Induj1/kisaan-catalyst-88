@@ -4,6 +4,7 @@ import Header from './Header';
 import Footer from './Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface PageLayoutProps {
 
 const PageLayout = ({ children }: PageLayoutProps) => {
   const { user } = useAuth();
+  const { language, setLanguage } = useLanguage();
   const [isHighContrast, setIsHighContrast] = useState<boolean>(() => {
     return localStorage.getItem('highContrast') === 'true';
   });
@@ -31,6 +33,8 @@ const PageLayout = ({ children }: PageLayoutProps) => {
       <Header 
         toggleContrast={toggleContrast}
         isHighContrast={isHighContrast}
+        language={language}
+        setLanguage={setLanguage}
       />
       <main className="flex-grow">
         {children}

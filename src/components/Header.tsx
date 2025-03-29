@@ -8,11 +8,15 @@ import LanguageSelector from './LanguageSelector';
 interface HeaderProps {
   toggleContrast?: () => void;
   isHighContrast?: boolean;
+  language?: 'english' | 'hindi' | 'kannada';
+  setLanguage?: React.Dispatch<React.SetStateAction<'english' | 'hindi' | 'kannada'>>;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
   toggleContrast, 
   isHighContrast,
+  language,
+  setLanguage
 }) => {
   return (
     <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 relative">

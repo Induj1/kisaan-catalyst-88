@@ -68,7 +68,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSuccess, sellerProfile }) =
         .insert({
           title: values.title,
           description: values.description,
-          price: Number(values.price),
+          price: Number(values.price),  // Now represents credits instead of rupees
           category: values.category,
           image_url: values.image_url || null,
           seller_id: user.id,
@@ -145,7 +145,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSuccess, sellerProfile }) =
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price (₹)</FormLabel>
+                <FormLabel>Price (Credits)</FormLabel>
                 <FormControl>
                   <Input {...field} type="number" min="1" step="1" />
                 </FormControl>

@@ -71,11 +71,11 @@ const LoanApplicationList: React.FC<LoanApplicationListProps> = ({ userId, limit
   const renderStatus = (status: string) => {
     switch (status) {
       case 'approved':
-        return <Badge className="bg-green-500">स्वीकृत (Approved)</Badge>;
+        return <Badge className="bg-green-500">Approved</Badge>;
       case 'rejected':
-        return <Badge variant="destructive">अस्वीकृत (Rejected)</Badge>;
+        return <Badge variant="destructive">Rejected</Badge>;
       default:
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">प्रक्रियाधीन (Pending)</Badge>;
+        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">Pending</Badge>;
     }
   };
 
@@ -117,7 +117,7 @@ const LoanApplicationList: React.FC<LoanApplicationListProps> = ({ userId, limit
           <CardTitle>Loan Applications</CardTitle>
         </CardHeader>
         <CardContent className="p-6 text-center text-muted-foreground">
-          <p>कोई ऋण आवेदन नहीं मिला (No loan applications found)</p>
+          <p>No loan applications found</p>
         </CardContent>
       </Card>
     );
@@ -129,10 +129,10 @@ const LoanApplicationList: React.FC<LoanApplicationListProps> = ({ userId, limit
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>दिनांक (Date)</TableHead>
-              <TableHead>राशि (Amount)</TableHead>
-              <TableHead>उद्देश्य (Purpose)</TableHead>
-              <TableHead>स्थिति (Status)</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Purpose</TableHead>
+              <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

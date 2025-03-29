@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -91,8 +92,8 @@ const LoanApplicationForm: React.FC<LoanApplicationFormProps> = ({ userId, credi
       
       if (data && data.length > 0) {
         toast({
-          title: "ऋण आवेदन सफल (Loan Application Successful)",
-          description: "आपका ऋण आवेदन जमा कर दिया गया है। हम जल्द ही आपसे संपर्क करेंगे।",
+          title: "Loan Application Successful",
+          description: "Your loan application has been submitted. We will contact you shortly.",
         });
         
         form.reset();
@@ -122,17 +123,14 @@ const LoanApplicationForm: React.FC<LoanApplicationFormProps> = ({ userId, credi
   return (
     <div className="space-y-6">
       <div className="p-4 border rounded-md bg-gray-50 dark:bg-gray-800">
-        <h3 className="font-medium mb-2">ऋण पात्रता (Loan Eligibility)</h3>
+        <h3 className="font-medium mb-2">Loan Eligibility</h3>
         <div className="mb-4">
           <CreditTracker creditScore={creditScore} />
         </div>
         <p className="text-sm">
           {isEligible 
-            ? `आप ₹${maxLoanAmount} तक के ऋण के लिए पात्र हैं` 
-            : "आप अभी ऋण के लिए पात्र नहीं हैं। कृपया अपना क्रेडिट स्कोर सुधारें।"}
-        </p>
-        <p className="text-xs text-muted-foreground mt-2">
-          (You are {isEligible ? `eligible for loans up to ₹${maxLoanAmount}` : "not eligible for loans at this time. Please improve your credit score."})
+            ? `You are eligible for loans up to ₹${maxLoanAmount}` 
+            : "You are not eligible for loans at this time. Please improve your credit score."}
         </p>
       </div>
 
@@ -144,7 +142,7 @@ const LoanApplicationForm: React.FC<LoanApplicationFormProps> = ({ userId, credi
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>ऋण राशि (Loan Amount)</FormLabel>
+                  <FormLabel>Loan Amount</FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 
@@ -155,8 +153,7 @@ const LoanApplicationForm: React.FC<LoanApplicationFormProps> = ({ userId, credi
                     />
                   </FormControl>
                   <FormDescription>
-                    आप अधिकतम ₹{maxLoanAmount} तक का ऋण ले सकते हैं
-                    (You can borrow up to ₹{maxLoanAmount})
+                    You can borrow up to ₹{maxLoanAmount}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -168,10 +165,10 @@ const LoanApplicationForm: React.FC<LoanApplicationFormProps> = ({ userId, credi
               name="purpose"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>ऋण का उद्देश्य (Loan Purpose)</FormLabel>
+                  <FormLabel>Loan Purpose</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="कृपया विस्तार से बताएं कि आप इस ऋण का उपयोग कैसे करेंगे" 
+                      placeholder="Please explain in detail how you plan to use this loan" 
                       className="min-h-[120px]"
                       {...field} 
                     />
@@ -188,10 +185,10 @@ const LoanApplicationForm: React.FC<LoanApplicationFormProps> = ({ userId, credi
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  आवेदन जमा कर रहा है...
+                  Processing...
                 </span>
               ) : (
-                'ऋण के लिए आवेदन करें (Apply for Loan)'
+                'Apply for Loan'
               )}
             </Button>
           </form>
@@ -199,11 +196,10 @@ const LoanApplicationForm: React.FC<LoanApplicationFormProps> = ({ userId, credi
       ) : (
         <div className="text-center p-4 border border-red-200 rounded-md bg-red-50 dark:bg-red-900/20 dark:border-red-800">
           <p className="text-red-600 dark:text-red-400 mb-2">
-            आप अभी ऋण के लिए पात्र नहीं हैं
+            You are not eligible for loans at this time
           </p>
           <p className="text-sm text-red-600/80 dark:text-red-400/80">
-            आपको ऋण के लिए पात्र होने के लिए कम से कम 600 का क्रेडिट स्कोर होना चाहिए
-            (You need a credit score of at least 600 to be eligible for loans)
+            You need a credit score of at least 600 to be eligible for loans
           </p>
         </div>
       )}

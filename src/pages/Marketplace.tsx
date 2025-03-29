@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabaseExt } from '@/integrations/supabase/clientExt';
 import ProductCard from '@/components/marketplace/ProductCard';
 import ProductForm from '@/components/marketplace/ProductForm';
-import { Package, ShoppingCart, DollarSign } from "lucide-react";
+import CreditPurchaseModal from '@/components/marketplace/CreditPurchaseModal';
+import { Package, ShoppingCart, DollarSign, Coins } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +31,7 @@ const Marketplace = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [confirmPurchaseOpen, setConfirmPurchaseOpen] = useState(false);
+  const [creditPurchaseOpen, setCreditPurchaseOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -73,7 +76,7 @@ const Marketplace = () => {
         
       if (error) throw error;
       setProducts(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching products:", error);
       toast({
         variant: "destructive",
@@ -108,11 +111,15 @@ const Marketplace = () => {
         
       if (buyerError) throw buyerError;
       
-      // Calculate credit discount (10% of price in credits)
-      const creditsToUse = Math.min(
-        Math.round(selectedProduct.price / 10), 
-        buyerData.credit_score
-      );
+      if (buyerData.credit_score < selectedProduct.price) {
+        toast({
+          variant: "destructive",
+          title: "Insufficient Credits",
+          description: `You need ${selectedProduct.price} credits to make this purchase. You currently have ${buyerData.credit_score} credits.`,
+        });
+        setConfirmPurchaseOpen(false);
+        return;
+      }
       
       // Complete the purchase
       const { error: purchaseError } = await supabaseExt
@@ -122,7 +129,7 @@ const Marketplace = () => {
           buyer_id: user.id,
           seller_id: selectedProduct.seller_id,
           amount: selectedProduct.price,
-          credits_used: creditsToUse,
+          credits_used: selectedProduct.price,
           status: 'completed',
           product_title: selectedProduct.title
         });
@@ -141,7 +148,7 @@ const Marketplace = () => {
       const { error: buyerUpdateError } = await supabaseExt
         .from('farmer_profiles')
         .update({ 
-          credit_score: buyerData.credit_score - creditsToUse 
+          credit_score: buyerData.credit_score - selectedProduct.price 
         })
         .eq('user_id', user.id);
         
@@ -177,6 +184,10 @@ const Marketplace = () => {
       sellTab.click();
     }
   };
+
+  const handleCreditPurchaseSuccess = () => {
+    setRefreshKey(prev => prev + 1);
+  };
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -184,11 +195,29 @@ const Marketplace = () => {
       
       <main className="flex-grow p-4 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
         <div className="container mx-auto">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold">Farmer's Marketplace</h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Buy and sell agricultural products directly from farmers
-            </p>
+          <div className="mb-6 flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold">Farmer's Marketplace</h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Buy and sell agricultural products using farm credits
+              </p>
+            </div>
+            
+            {user && profile && (
+              <div className="flex items-center gap-3">
+                <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Your Credits</div>
+                  <div className="text-xl font-bold text-primary flex items-center gap-1">
+                    <Coins size={18} />
+                    {profile.credit_score || 0}
+                  </div>
+                </div>
+                
+                <Button onClick={() => setCreditPurchaseOpen(true)}>
+                  Buy Credits
+                </Button>
+              </div>
+            )}
           </div>
           
           <Tabs defaultValue="browse" className="w-full">
@@ -269,7 +298,7 @@ const Marketplace = () => {
                           >
                             <div>
                               <h4 className="font-medium">{listing.title}</h4>
-                              <p className="text-sm text-gray-600">₹{listing.price}</p>
+                              <p className="text-sm text-gray-600">{listing.price} credits</p>
                               <span className={`text-xs px-2 py-1 rounded-full ${
                                 listing.status === 'active' 
                                   ? 'bg-green-100 text-green-800' 
@@ -330,7 +359,10 @@ const Marketplace = () => {
               <div className="mt-4 p-4 bg-gray-50 rounded-md">
                 <div className="flex justify-between mb-2">
                   <span>Price:</span>
-                  <span>₹{selectedProduct.price}</span>
+                  <span className="flex items-center">
+                    <Coins size={16} className="mr-1" />
+                    {selectedProduct.price} credits
+                  </span>
                 </div>
                 
                 <div className="flex justify-between mb-2">
@@ -338,20 +370,14 @@ const Marketplace = () => {
                   <span>{profile?.credit_score || 0}</span>
                 </div>
                 
-                <div className="flex justify-between mb-2">
-                  <span>Credits discount:</span>
-                  <span>-₹{Math.min(Math.round(selectedProduct.price / 10), profile?.credit_score || 0) * 10}</span>
-                </div>
-                
                 <div className="border-t pt-2 mt-2 font-bold flex justify-between">
-                  <span>Total to pay:</span>
-                  <span>₹{selectedProduct.price - (Math.min(Math.round(selectedProduct.price / 10), profile?.credit_score || 0) * 10)}</span>
+                  <span>Credits after purchase:</span>
+                  <span>{(profile?.credit_score || 0) - selectedProduct.price} credits</span>
                 </div>
               </div>
               
               <p className="text-xs text-gray-500 mt-4">
-                Payment will be handled directly with the seller.
-                Contact details will be shared after confirmation.
+                The seller's contact information will be shared with you after the purchase is complete.
               </p>
             </div>
           )}
@@ -366,6 +392,12 @@ const Marketplace = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      <CreditPurchaseModal 
+        open={creditPurchaseOpen}
+        onClose={() => setCreditPurchaseOpen(false)}
+        onSuccess={handleCreditPurchaseSuccess}
+      />
       
       <Footer />
     </div>

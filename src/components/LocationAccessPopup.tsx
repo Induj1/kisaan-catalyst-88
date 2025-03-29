@@ -28,6 +28,13 @@ const LocationAccessPopup: React.FC<LocationAccessPopupProps> = ({
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
+  // Request location immediately when popup opens
+  useEffect(() => {
+    if (open) {
+      handleGetLocation();
+    }
+  }, [open]);
+
   const handleGetLocation = () => {
     setIsLoading(true);
     

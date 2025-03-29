@@ -2,20 +2,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import FarmerProfile from '@/components/FarmerProfile';
 import CreditTracker from '@/components/CreditTracker';
-import LoanApplicationList from '@/components/LoanApplicationList';
-import LoanApplicationForm from '@/components/LoanApplicationForm';
 import ChatbotWidget from '@/components/ChatbotWidget';
-import LiveDataWidget from '@/components/LiveDataWidget';
-import MapPlanner from '@/components/MapPlanner';
 import LocationAccessPopup from '@/components/LocationAccessPopup';
-import { Cloud, Tractor, Map, BarChart4, Lightbulb, ShoppingCart } from 'lucide-react';
+import { Cloud, Tractor, BarChart4, Lightbulb, ShoppingCart, Droplets, Calendar, SlidersHorizontal } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Dashboard = () => {
@@ -86,6 +81,66 @@ const Dashboard = () => {
     setRefreshKey(prev => prev + 1);
   };
 
+  // Feature menu items
+  const featureItems = [
+    {
+      icon: Cloud,
+      title: language === 'english' ? 'Weather' : language === 'hindi' ? 'मौसम' : 'ಹವಾಮಾನ',
+      description: language === 'english' ? 'Check forecasts and alerts' : language === 'hindi' ? 'पूर्वानुमान और अलर्ट देखें' : 'ಮುನ್ಸೂಚನೆಗಳು ಮತ್ತು ಎಚ್ಚರಿಕೆಗಳನ್ನು ಪರಿಶೀಲಿಸಿ',
+      route: '/weather',
+      color: 'bg-blue-500',
+    },
+    {
+      icon: Tractor,
+      title: language === 'english' ? 'Farm Planner' : language === 'hindi' ? 'फार्म प्लानर' : 'ಕೃಷಿ ಯೋಜಕ',
+      description: language === 'english' ? 'Plan your farm activities' : language === 'hindi' ? 'अपनी कृषि गतिविधियों की योजना बनाएं' : 'ನಿಮ್ಮ ಕೃಷಿ ಚಟುವಟಿಕೆಗಳನ್ನು ಯೋಜಿಸಿ',
+      route: '/farm-planner',
+      color: 'bg-green-500',
+    },
+    {
+      icon: BarChart4,
+      title: language === 'english' ? 'Market Prices' : language === 'hindi' ? 'बाजार मूल्य' : 'ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು',
+      description: language === 'english' ? 'Check current crop prices' : language === 'hindi' ? 'वर्तमान फसल मूल्य देखें' : 'ಪ್ರಸ್ತುತ ಬೆಳೆ ಬೆಲೆಗಳನ್ನು ಪರಿಶೀಲಿಸಿ',
+      route: '/market-prices',
+      color: 'bg-amber-500',
+    },
+    {
+      icon: ShoppingCart,
+      title: language === 'english' ? 'Marketplace' : language === 'hindi' ? 'बाज़ार' : 'ಮಾರುಕಟ್ಟೆ',
+      description: language === 'english' ? 'Buy and sell products' : language === 'hindi' ? 'उत्पादों को खरीदें और बेचें' : 'ಉತ್ಪನ್ನಗಳನ್ನು ಖರೀದಿಸಿ ಮತ್ತು ಮಾರಾಟ ಮಾಡಿ',
+      route: '/marketplace',
+      color: 'bg-purple-500',
+    },
+    {
+      icon: Droplets,
+      title: language === 'english' ? 'Loans' : language === 'hindi' ? 'ऋण' : 'ಸಾಲಗಳು',
+      description: language === 'english' ? 'Apply for agricultural loans' : language === 'hindi' ? 'कृषि ऋण के लिए आवेदन करें' : 'ಕೃಷಿ ಸಾಲಗಳಿಗೆ ಅರ್ಜಿ ಸಲ್ಲಿಸಿ',
+      route: '/loans',
+      color: 'bg-teal-500',
+    },
+    {
+      icon: Lightbulb,
+      title: language === 'english' ? 'Ask Expert' : language === 'hindi' ? 'विशेषज्ञ से पूछें' : 'ತಜ್ಞರನ್ನು ಕೇಳಿ',
+      description: language === 'english' ? 'Get advice from AI assistant' : language === 'hindi' ? 'AI सहायक से सलाह प्राप्त करें' : 'AI ಸಹಾಯಕರಿಂದ ಸಲಹೆ ಪಡೆಯಿರಿ',
+      route: '/ask-expert',
+      color: 'bg-orange-500',
+    },
+    {
+      icon: Calendar,
+      title: language === 'english' ? 'Crop Calendar' : language === 'hindi' ? 'फसल कैलेंडर' : 'ಬೆಳೆ ಕ್ಯಾಲೆಂಡರ್',
+      description: language === 'english' ? 'Seasonal planting guide' : language === 'hindi' ? 'मौसमी रोपण मार्गदर्शिका' : 'ಋತುವಿನ ಬೇಸಾಯ ಮಾರ್ಗದರ್ಶಿ',
+      route: '/crop-calendar',
+      color: 'bg-indigo-500',
+    },
+    {
+      icon: SlidersHorizontal,
+      title: language === 'english' ? 'Settings' : language === 'hindi' ? 'सेटिंग्स' : 'ಸೆಟ್ಟಿಂಗ್‌ಗಳು',
+      description: language === 'english' ? 'Manage your preferences' : language === 'hindi' ? 'अपनी प्राथमिकताओं का प्रबंधन करें' : 'ನಿಮ್ಮ ಆದ್ಯತೆಗಳನ್ನು ನಿರ್ವಹಿಸಿ',
+      route: '/settings',
+      color: 'bg-gray-500',
+    },
+  ];
+
   return (
     <div className={`min-h-screen flex flex-col ${isHighContrast ? 'high-contrast' : ''}`}>
       <Header 
@@ -114,213 +169,35 @@ const Dashboard = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-800">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center text-blue-700 dark:text-blue-300">
-                  <Cloud className="mr-2" size={20} />
-                  {language === 'english' ? 'Weather Forecast' : language === 'hindi' ? 'मौसम का पूर्वानुमान' : 'ಹವಾಮಾನ ಮುನ್ಸೂಚನೆ'}
-                </CardTitle>
-                <CardDescription>
-                  {language === 'english' 
-                    ? 'Real-time weather updates for your location' 
-                    : language === 'hindi' 
-                      ? 'आपके स्थान के लिए रीयल-टाइम मौसम अपडेट' 
-                      : 'ನಿಮ್ಮ ಸ್ಥಳಕ್ಕೆ ನೈಜ-ಸಮಯದ ಹವಾಮಾನ ನವೀಕರಣಗಳು'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <LiveDataWidget 
-                  widgetType="weather" 
-                  language={language}
-                  latitude={latitude}
-                  longitude={longitude}
-                />
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center text-green-700 dark:text-green-300">
-                  <Tractor className="mr-2" size={20} />
-                  {language === 'english' ? 'Farm Planning' : language === 'hindi' ? 'कृषि योजना' : 'ಕೃಷಿ ಯೋಜನೆ'}
-                </CardTitle>
-                <CardDescription>
-                  {language === 'english' 
-                    ? 'Plan your farm operations intelligently' 
-                    : language === 'hindi' 
-                      ? 'अपने कृषि कार्यों की बुद्धिमानी से योजना बनाएं' 
-                      : 'ನಿಮ್ಮ ಕೃಷಿ ಕಾರ್ಯಾಚರಣೆಗಳನ್ನು ಬುದ್ಧಿವಂತಿಕೆಯಿಂದ ಯೋಜಿಸಿ'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pb-2">
-                <div className="h-48 relative overflow-hidden rounded-md bg-green-200/50 dark:bg-green-900/30">
-                  <Map className="absolute inset-0 m-auto h-16 w-16 text-green-500/40" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Link to="/farm-planner">
-                      <Button className="bg-green-600 hover:bg-green-700">
-                        {language === 'english' 
-                          ? 'Open Farm Planner' 
-                          : language === 'hindi' 
-                            ? 'फार्म प्लानर खोलें' 
-                            : 'ಕೃಷಿ ಯೋಜಕವನ್ನು ತೆರೆಯಿರಿ'}
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="pt-0">
-                <p className="text-xs text-green-700 dark:text-green-300">
-                  {language === 'english' 
-                    ? 'Access AI-powered crop recommendations based on your location and preferences' 
-                    : language === 'hindi' 
-                      ? 'आपके स्थान और प्राथमिकताओं के आधार पर AI-संचालित फसल अनुशंसाओं तक पहुंचें' 
-                      : 'ನಿಮ್ಮ ಸ್ಥಳ ಮತ್ತು ಆದ್ಯತೆಗಳ ಆಧಾರದ ಮೇಲೆ AI-ಪವರ್ಡ್ ಬೆಳೆ ಶಿಫಾರಸುಗಳನ್ನು ಪಡೆಯಿರಿ'}
-                </p>
-              </CardFooter>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border-amber-200 dark:border-amber-800">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center text-amber-700 dark:text-amber-300">
-                  <BarChart4 className="mr-2" size={20} />
-                  {language === 'english' ? 'Market Prices' : language === 'hindi' ? 'बाजार मूल्य' : 'ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು'}
-                </CardTitle>
-                <CardDescription>
-                  {language === 'english' 
-                    ? 'Live market prices from local mandis' 
-                    : language === 'hindi' 
-                      ? 'स्थानीय मंडियों से लाइव बाजार मूल्य' 
-                      : 'ಸ್ಥಳೀಯ ಮಂಡಿಗಳಿಂದ ಲೈವ್ ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <LiveDataWidget 
-                  widgetType="mandi" 
-                  language={language}
-                  latitude={latitude}
-                  longitude={longitude}
-                />
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mb-6">
-            <Link to="/marketplace">
-              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-800 hover:shadow-md transition-shadow">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center">
-                    <ShoppingCart className="mr-3 text-purple-600" size={24} />
-                    <div>
-                      <h3 className="font-semibold text-lg text-purple-700 dark:text-purple-300">
-                        {language === 'english' ? 'Farmer Marketplace' : language === 'hindi' ? 'किसान बाज़ार' : 'ರೈತ ಮಾರುಕಟ್ಟೆ'}
-                      </h3>
-                      <p className="text-sm text-purple-600 dark:text-purple-400">
-                        {language === 'english' 
-                          ? 'Buy and sell agricultural products directly' 
-                          : language === 'hindi' 
-                            ? 'कृषि उत्पादों को सीधे खरीदें और बेचें' 
-                            : 'ಕೃಷಿ ಉತ್ಪನ್ನಗಳನ್ನು ನೇರವಾಗಿ ಖರೀದಿಸಿ ಮತ್ತು ಮಾರಾಟ ಮಾಡಿ'}
-                      </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {featureItems.map((item, index) => (
+              <Link to={item.route} key={index}>
+                <Card className="h-full hover:shadow-md transition-shadow duration-300 border-t-4" style={{ borderTopColor: item.color }}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${item.color.replace('bg-', 'text-')} mb-4`}>
+                        <item.icon size={28} className="text-white" />
+                      </div>
                     </div>
-                  </div>
-                  <Button variant="outline" className="bg-white dark:bg-gray-800">
-                    {language === 'english' ? 'Visit' : language === 'hindi' ? 'जाएँ' : 'ಭೇಟಿ ನೀಡಿ'}
-                  </Button>
-                </CardContent>
-              </Card>
-            </Link>
+                    <h3 className="text-lg font-medium mb-2">{item.title}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{item.description}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
           </div>
 
-          <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-6">
-              <TabsTrigger value="profile">
-                {language === 'english' ? 'Profile' : language === 'hindi' ? 'प्रोफाइल' : 'ಪ್ರೊಫೈಲ್'}
-              </TabsTrigger>
-              <TabsTrigger value="loans">
-                {language === 'english' ? 'Loans' : language === 'hindi' ? 'ऋण' : 'ಸಾಲಗಳು'}
-              </TabsTrigger>
-              <TabsTrigger value="chatbot">
-                {language === 'english' ? 'Ask Expert' : language === 'hindi' ? 'विशेषज्ञ से पूछें' : 'ತಜ್ಞರನ್ನು ಕೇಳಿ'}
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="profile">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FarmerProfile 
-                  user={user} 
-                  mode="edit" 
-                  onProfileUpdated={handleProfileRefresh} 
-                />
-                <CreditTracker 
-                  creditScore={creditScore}
-                  onRefresh={handleProfileRefresh}
-                />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="loans">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <LoanApplicationForm 
-                  userId={user?.id} 
-                  creditScore={creditScore} 
-                />
-                <LoanApplicationList 
-                  userId={user?.id} 
-                />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="chatbot">
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-                <div className="md:col-span-3">
-                  <ChatbotWidget />
-                </div>
-                <div className="md:col-span-2">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <Lightbulb className="mr-2 text-amber-500" size={20} />
-                        {language === 'english' ? 'Farming Tips' : language === 'hindi' ? 'कृषि संबंधी सुझाव' : 'ಕೃಷಿ ಸಲಹೆಗಳು'}
-                      </CardTitle>
-                      <CardDescription>
-                        {language === 'english' 
-                          ? 'Expert recommendations for your farm' 
-                          : language === 'hindi' 
-                            ? 'आपके खेत के लिए विशेषज्ञ अनुशंसाएँ' 
-                            : 'ನಿಮ್ಮ ಕೃಷಿಗೆ ತಜ್ಞರ ಶಿಫಾರಸುಗಳು'}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-2">
-                        <li className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-md">
-                          {language === 'english' 
-                            ? 'Rotate crops to maintain soil health and prevent pest buildup.' 
-                            : language === 'hindi' 
-                              ? 'मिट्टी के स्वास्थ्य को बनाए रखने और कीटों के जमाव को रोकने के लिए फसलों का चक्रण करें।' 
-                              : 'ಮಣ್ಣಿನ ಆರೋಗ್ಯವನ್ನು ಕಾಪಾಡಿಕೊಳ್ಳಲು ಮತ್ತು ಕೀಟಗಳ ಸಂಗ್ರಹವನ್ನು ತಡೆಯಲು ಬೆಳೆಗಳನ್ನು ತಿರುಗಿಸಿ.'}
-                        </li>
-                        <li className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-md">
-                          {language === 'english' 
-                            ? 'Implement drip irrigation to save water and improve yield.' 
-                            : language === 'hindi' 
-                              ? 'पानी बचाने और उपज में सुधार के लिए ड्रिप सिंचाई लागू करें।' 
-                              : 'ನೀರನ್ನು ಉಳಿಸಲು ಮತ್ತು ಇಳುವರಿಯನ್ನು ಸುಧಾರಿಸಲು ಹನಿ ನೀರಾವರಿಯನ್ನು ಅಳವಡಿಸಿ.'}
-                        </li>
-                        <li className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-md">
-                          {language === 'english' 
-                            ? 'Use organic fertilizers to improve soil health long-term.' 
-                            : language === 'hindi' 
-                              ? 'दीर्घकालिक मिट्टी के स्वास्थ्य में सुधार के लिए जैविक उर्वरकों का उपयोग करें।' 
-                              : 'ದೀರ್ಘಾವಧಿಯ ಮಣ್ಣಿನ ಆರೋಗ್ಯವನ್ನು ಸುಧಾರಿಸಲು ಸಾವಯವ ಗೊಬ್ಬರಗಳನ್ನು ಬಳಸಿ.'}
-                        </li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FarmerProfile 
+              user={user} 
+              mode="edit" 
+              onProfileUpdated={handleProfileRefresh} 
+            />
+            <CreditTracker 
+              creditScore={creditScore}
+              onRefresh={handleProfileRefresh}
+            />
+          </div>
         </div>
       </main>
 

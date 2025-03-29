@@ -8,13 +8,16 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import Features from "./pages/Features";
 import Demo from "./pages/Demo";
-import Stories from "./pages/Stories";
 import Government from "./pages/Government";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
 import FarmPlanner from "./pages/FarmPlanner";
 import Marketplace from "./pages/Marketplace";
+import Weather from "./pages/Weather";
+import MarketPrices from "./pages/MarketPrices";
+import Loans from "./pages/Loans";
+import AskExpert from "./pages/AskExpert";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,7 +43,6 @@ const AppRoutes = () => {
       <Route path="/" element={<Index />} />
       <Route path="/features" element={<Features />} />
       <Route path="/demo" element={<Demo />} />
-      <Route path="/stories" element={<Stories />} />
       <Route path="/government" element={<Government />} />
       <Route path="/sign-in" element={<SignIn />} />
       <Route path="/sign-up" element={<SignUp />} />
@@ -65,6 +67,38 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Marketplace />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/weather" 
+        element={
+          <ProtectedRoute>
+            <Weather />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/market-prices" 
+        element={
+          <ProtectedRoute>
+            <MarketPrices />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/loans" 
+        element={
+          <ProtectedRoute>
+            <Loans />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/ask-expert" 
+        element={
+          <ProtectedRoute>
+            <AskExpert />
           </ProtectedRoute>
         } 
       />

@@ -7,7 +7,6 @@ import {
   Home, 
   Info, 
   PenSquare, 
-  BookOpen, 
   Landmark, 
   LogIn, 
   LogOut, 
@@ -57,7 +56,6 @@ const Navigation: React.FC = () => {
     { to: "/", icon: Home, label: "Home" },
     { to: "/features", icon: Info, label: "Features" },
     { to: "/demo", icon: PenSquare, label: "Demo" },
-    { to: "/stories", icon: BookOpen, label: "Success Stories" },
     { to: "/government", icon: Landmark, label: "Government Schemes" },
   ];
 

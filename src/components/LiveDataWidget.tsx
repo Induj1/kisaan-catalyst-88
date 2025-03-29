@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { Cloud, Sun, Droplets, Thermometer, ArrowDown, ArrowUp } from 'lucide-react';
+import { Cloud, Sun, Droplets, Thermometer, ArrowDown, ArrowUp, MapPin } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 interface WeatherData {
@@ -28,20 +29,20 @@ interface MandiData {
 
 // Default weather data
 const defaultWeatherData: WeatherData = {
-  location: "Delhi, India",
-  temperature: 32,
+  location: "Location unavailable",
+  temperature: 28,
   humidity: 45,
   rainfall: 0,
   forecast: [
-    { day: "Today", temp: 32, condition: "Sunny" },
-    { day: "Tomorrow", temp: 30, condition: "Partly Cloudy" },
-    { day: "Wed", temp: 28, condition: "Cloudy" }
+    { day: "Today", temp: 28, condition: "Sunny" },
+    { day: "Tomorrow", temp: 29, condition: "Partly Cloudy" },
+    { day: "Wed", temp: 27, condition: "Cloudy" }
   ]
 };
 
 // Default mandi data
 const defaultMandiData: MandiData = {
-  mandiName: "Azadpur Mandi",
+  mandiName: "Nearest Mandi",
   crops: [
     { name: "Wheat", price: 2150, trend: "up", change: 50 },
     { name: "Rice", price: 3200, trend: "down", change: 30 },
@@ -59,6 +60,7 @@ interface LiveDataWidgetProps {
   };
   latitude?: number | null;
   longitude?: number | null;
+  onRequestLocation?: () => void;
 }
 
 const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({ 
@@ -66,7 +68,8 @@ const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({
   language = 'english',
   data,
   latitude,
-  longitude
+  longitude,
+  onRequestLocation
 }) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
@@ -79,9 +82,11 @@ const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({
     
     const fetchTimer = setTimeout(() => {
       if (latitude && longitude) {
+        console.log("Fetching with coords:", latitude, longitude);
         fetchWeatherByLocation(latitude, longitude);
         fetchNearbyMandi(latitude, longitude);
       } else {
+        console.log("No location available, using defaults");
         setWeatherData(defaultWeatherData);
         setMandiData(defaultMandiData);
         setIsLoading(false);
@@ -216,6 +221,27 @@ const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({
     return locations[locationIndex];
   };
 
+  const renderLocationPrompt = () => (
+    <div className="flex flex-col items-center justify-center py-6">
+      <MapPin className="h-12 w-12 text-gray-400 mb-4" />
+      <p className="text-center text-gray-600 dark:text-gray-400 mb-4">
+        {language === 'english' 
+          ? 'Location access is needed to show accurate weather and market data.' 
+          : language === 'hindi' 
+            ? 'सटीक मौसम और बाजार डेटा दिखाने के लिए स्थान तक पहुंच की आवश्यकता है।' 
+            : 'ನಿಖರವಾದ ಹವಾಮಾನ ಮತ್ತು ಮಾರುಕಟ್ಟೆ ಡೇಟಾವನ್ನು ತೋರಿಸಲು ಸ್ಥಳ ಪ್ರವೇಶ ಅಗತ್ಯವಿದೆ.'}
+      </p>
+      <Button onClick={onRequestLocation} className="gap-2">
+        <MapPin size={16} />
+        {language === 'english' 
+          ? 'Share Location' 
+          : language === 'hindi' 
+            ? 'स्थान साझा करें' 
+            : 'ಸ್ಥಳವನ್ನು ಹಂಚಿಕೊಳ್ಳಿ'}
+      </Button>
+    </div>
+  );
+
   const renderWeatherWidget = () => (
     <Card className="w-full overflow-hidden">
       <CardHeader className="bg-primary/10 pb-2">
@@ -235,6 +261,8 @@ const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({
             <div className="h-4 bg-gray-200 rounded w-full"></div>
             <div className="h-4 bg-gray-200 rounded w-5/6"></div>
           </div>
+        ) : !latitude || !longitude ? (
+          renderLocationPrompt()
         ) : (
           <>
             <div className="flex justify-between mb-4">
@@ -300,6 +328,8 @@ const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({
             <div className="h-4 bg-gray-200 rounded w-5/6"></div>
             <div className="h-4 bg-gray-200 rounded w-full"></div>
           </div>
+        ) : !latitude || !longitude ? (
+          renderLocationPrompt()
         ) : (
           <div className="space-y-3">
             {mandiData.crops.map((crop, index) => (

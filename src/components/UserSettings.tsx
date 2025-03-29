@@ -75,7 +75,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ profile, onProfileUpdate })
           location: values.location,
           address: values.location, // Using location as address
           crop_type: values.crop_type,
-          land_size: Number(values.land_size), // Fixed: Explicitly convert to number
+          land_size: Number(values.land_size), // Ensuring land_size is converted to number
         })
         .eq('user_id', user.id);
 

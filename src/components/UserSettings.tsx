@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +22,7 @@ const formSchema = z.object({
   phone: z.string().min(10, { message: "Please enter a valid phone number" }),
   location: z.string().min(2, { message: "Please enter your location" }),
   crop_type: z.string().min(2, { message: "Please enter crop type" }),
-  land_size: z.string().transform(val => Number(val)).refine(val => !isNaN(val) && val > 0, {
+  land_size: z.string().min(1).refine(val => !isNaN(Number(val)) && Number(val) > 0, {
     message: "Land size must be a positive number",
   }),
 });
@@ -57,7 +56,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ profile, onProfileUpdate })
       phone: profile?.phone || '',
       location: profile?.location || '',
       crop_type: profile?.crop_type || '',
-      land_size: profile?.land_size ? profile.land_size.toString() : '1', // Fix: Convert number to string
+      land_size: profile?.land_size ? profile.land_size.toString() : '1',
     },
   });
 

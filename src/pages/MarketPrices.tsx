@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import LiveDataWidget from '@/components/LiveDataWidget';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart, LineChart } from '@/components/ui/chart';
+import LineChart from '@/components/charts/LineChart';
+import BarChart from '@/components/charts/BarChart';
 import { ArrowDown, ArrowUp, BarChart4, RefreshCw, Search, TrendingUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,6 @@ const MarketPrices = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    // Check if we already have location
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -29,7 +28,6 @@ const MarketPrices = () => {
         },
         (error) => {
           console.log("Geolocation error or permission denied:", error);
-          // Show popup to request location
           setShowLocationPopup(true);
         }
       );
@@ -50,7 +48,6 @@ const MarketPrices = () => {
     setShowLocationPopup(true);
   };
 
-  // Sample data for price trends chart
   const wheatPriceData = [
     { date: 'Jan', price: 2100 },
     { date: 'Feb', price: 2050 },
@@ -69,7 +66,6 @@ const MarketPrices = () => {
     { date: 'Jun', price: 3200 },
   ];
 
-  // Sample data for price comparison chart
   const cropComparisonData = [
     { name: 'Wheat', local: 2200, national: 2150 },
     { name: 'Rice', local: 3200, national: 3150 },

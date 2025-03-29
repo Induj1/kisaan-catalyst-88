@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ChatbotWidget from '@/components/ChatbotWidget';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Lightbulb, Plant, BugIcon, Droplets, Sprout } from 'lucide-react';
+import { Lightbulb, Sprout, BugIcon, Droplets } from 'lucide-react';
 
 const AskExpert = () => {
   const [isHighContrast, setIsHighContrast] = useState(false);
@@ -109,7 +108,7 @@ const AskExpert = () => {
                   <Tabs defaultValue="crops">
                     <TabsList className="grid w-full grid-cols-3">
                       <TabsTrigger value="crops">
-                        <Plant className="mr-1 h-4 w-4" />
+                        <Sprout className="mr-1 h-4 w-4" />
                         {language === 'english' 
                           ? 'Crops' 
                           : language === 'hindi' 

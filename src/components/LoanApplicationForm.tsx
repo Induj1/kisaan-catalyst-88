@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import CreditTracker from './CreditTracker';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 interface LoanApplicationFormProps {
   userId: string | undefined;
@@ -23,7 +23,7 @@ const formSchema = z.object({
   purpose: z.string().min(10, { message: "Please provide a detailed purpose for the loan" }),
 });
 
-const LoanApplicationForm: React.FC<LoanApplicationFormProps> = ({ userId, creditScore }) => {
+const LoanApplicationForm: React.FC<LoanApplicationFormProps> = ({ userId, creditScore = 0 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isEligible = creditScore >= 600;
   const maxLoanAmount = calculateMaxLoanAmount(creditScore);
@@ -108,6 +108,16 @@ const LoanApplicationForm: React.FC<LoanApplicationFormProps> = ({ userId, credi
       setIsSubmitting(false);
     }
   };
+
+  if (!userId) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center">
+          <p>Please sign in to apply for loans.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">

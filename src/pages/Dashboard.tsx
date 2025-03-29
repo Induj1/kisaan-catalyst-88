@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,7 @@ import LiveDataWidget from '@/components/LiveDataWidget';
 import MapPlanner from '@/components/MapPlanner';
 import LocationAccessPopup from '@/components/LocationAccessPopup';
 import { Cloud, Tractor, Map, BarChart4, Lightbulb } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Dashboard = () => {
   const { user, isNewUser, setIsNewUser } = useAuth();
@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [longitude, setLongitude] = useState<number | null>(null);
   const [isHighContrast, setIsHighContrast] = useState(false);
   const [language, setLanguage] = useState<'english' | 'hindi' | 'kannada'>('hindi');
+  const [creditScore, setCreditScore] = useState(650); // Default credit score
 
   useEffect(() => {
     // If it's a new user, show the location popup
@@ -33,7 +34,24 @@ const Dashboard = () => {
       // Reset the newUser flag
       setIsNewUser(false);
     }
-  }, [isNewUser, setIsNewUser]);
+
+    // Fetch credit score for the user if they are logged in
+    const fetchCreditScore = async () => {
+      if (user) {
+        const { data, error } = await supabase
+          .from('farmer_profiles')
+          .select('credit_score')
+          .eq('user_id', user.id)
+          .single();
+          
+        if (!error && data) {
+          setCreditScore(data.credit_score);
+        }
+      }
+    };
+    
+    fetchCreditScore();
+  }, [isNewUser, setIsNewUser, user]);
 
   const toggleContrast = () => {
     setIsHighContrast(!isHighContrast);
@@ -170,15 +188,24 @@ const Dashboard = () => {
 
             <TabsContent value="profile">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FarmerProfile />
+                <FarmerProfile 
+                  user={user} 
+                  mode="edit" 
+                  onProfileUpdated={() => {}} 
+                />
                 <CreditTracker />
               </div>
             </TabsContent>
 
             <TabsContent value="loans">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <LoanApplicationForm />
-                <LoanApplicationList />
+                <LoanApplicationForm 
+                  userId={user?.id} 
+                  creditScore={creditScore} 
+                />
+                <LoanApplicationList 
+                  userId={user?.id} 
+                />
               </div>
             </TabsContent>
 

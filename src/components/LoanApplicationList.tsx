@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from 'date-fns';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
@@ -21,7 +21,10 @@ const LoanApplicationList: React.FC<LoanApplicationListProps> = ({ userId, limit
   const pageSize = limit || 10;
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
 
     const fetchApplications = async () => {
       try {
@@ -84,17 +87,35 @@ const LoanApplicationList: React.FC<LoanApplicationListProps> = ({ userId, limit
     }
   };
 
+  if (!userId) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center">
+          <p>Please sign in to view your loan applications.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (loading && applications.length === 0) {
     return (
-      <div className="flex justify-center p-8">
-        <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></div>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Loan Applications</CardTitle>
+        </CardHeader>
+        <CardContent className="flex justify-center p-6">
+          <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></div>
+        </CardContent>
+      </Card>
     );
   }
 
   if (applications.length === 0) {
     return (
       <Card>
+        <CardHeader>
+          <CardTitle>Loan Applications</CardTitle>
+        </CardHeader>
         <CardContent className="p-6 text-center text-muted-foreground">
           <p>कोई ऋण आवेदन नहीं मिला (No loan applications found)</p>
         </CardContent>

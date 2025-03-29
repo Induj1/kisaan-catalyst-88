@@ -1,262 +1,248 @@
 
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from "@/integrations/supabase/client";
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "@/hooks/use-toast";
-import { User } from '@supabase/supabase-js';
-import CreditTracker from '@/components/CreditTracker';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import { useAuth } from '@/contexts/AuthContext';
 import FarmerProfile from '@/components/FarmerProfile';
-import LoanApplicationForm from '@/components/LoanApplicationForm';
+import CreditTracker from '@/components/CreditTracker';
 import LoanApplicationList from '@/components/LoanApplicationList';
+import LoanApplicationForm from '@/components/LoanApplicationForm';
+import ChatbotWidget from '@/components/ChatbotWidget';
+import LiveDataWidget from '@/components/LiveDataWidget';
+import MapPlanner from '@/components/MapPlanner';
+import LocationAccessPopup from '@/components/LocationAccessPopup';
+import { Cloud, Tractor, Map, BarChart4, Lightbulb } from 'lucide-react';
 
 const Dashboard = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [farmerProfile, setFarmerProfile] = useState<any>(null);
-  const [hasProfile, setHasProfile] = useState(false);
-  const [activeTab, setActiveTab] = useState("overview");
-  const navigate = useNavigate();
-  
+  const { user, isNewUser, setIsNewUser } = useAuth();
+  const [showLocationPopup, setShowLocationPopup] = useState(false);
+  const [locationGranted, setLocationGranted] = useState(false);
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [isHighContrast, setIsHighContrast] = useState(false);
+  const [language, setLanguage] = useState<'english' | 'hindi' | 'kannada'>('hindi');
+
   useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session) {
-          navigate('/sign-in');
-          return;
-        }
-        
-        setUser(session.user);
-        
-        // Check if user has a farmer profile
-        const { data: profileData, error: profileError } = await supabase
-          .from('farmer_profiles')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
-        
-        if (profileError) {
-          console.error('Error fetching farmer profile:', profileError);
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to fetch your profile. Please try again later.",
-          });
-        }
-        
-        if (profileData) {
-          setFarmerProfile(profileData);
-          setHasProfile(true);
-        }
-      } catch (error) {
-        console.error('Session error:', error);
-        toast({
-          variant: "destructive",
-          title: "Authentication Error",
-          description: "Please sign in to access this page.",
-        });
-        navigate('/sign-in');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    checkUser();
-  }, [navigate]);
-  
-  const handleProfileCreated = (profile: any) => {
-    setFarmerProfile(profile);
-    setHasProfile(true);
-    toast({
-      title: "Profile Created",
-      description: "Your farmer profile has been created successfully.",
-    });
-  };
-  
-  const handleProfileUpdated = (profile: any) => {
-    setFarmerProfile(profile);
-    toast({
-      title: "Profile Updated",
-      description: "Your farmer profile has been updated successfully.",
-    });
+    // If it's a new user, show the location popup
+    if (isNewUser) {
+      setShowLocationPopup(true);
+      // Reset the newUser flag
+      setIsNewUser(false);
+    }
+  }, [isNewUser, setIsNewUser]);
+
+  const toggleContrast = () => {
+    setIsHighContrast(!isHighContrast);
+    document.documentElement.classList.toggle('high-contrast');
   };
 
-  const navigateToTab = (tabName: string) => {
-    setActiveTab(tabName);
+  const handleLocationGranted = (lat: number, lng: number) => {
+    setLatitude(lat);
+    setLongitude(lng);
+    setLocationGranted(true);
   };
-  
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full"></div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-  
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      
-      <main className="flex-grow p-4 md:p-8 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">किसान डैशबोर्ड (Farmer Dashboard)</h1>
-          
-          {!hasProfile ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>प्रोफ़ाइल बनाएं (Create Your Profile)</CardTitle>
+    <div className={`min-h-screen flex flex-col ${isHighContrast ? 'high-contrast' : ''}`}>
+      <Header 
+        toggleContrast={toggleContrast} 
+        isHighContrast={isHighContrast} 
+        language={language}
+        setLanguage={setLanguage}
+      />
+
+      <main className="flex-grow p-4 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="container mx-auto">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold">
+              {language === 'english' 
+                ? 'Welcome to KisaanMitra' 
+                : language === 'hindi' 
+                  ? 'किसानमित्र में आपका स्वागत है' 
+                  : 'ಕಿಸಾನ್‌ಮಿತ್ರ ಗೆ ಸುಸ್ವಾಗತ'}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              {language === 'english' 
+                ? 'Your personalized farming assistant' 
+                : language === 'hindi' 
+                  ? 'आपका व्यक्तिगत कृषि सहायक' 
+                  : 'ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಕೃಷಿ ಸಹಾಯಕ'}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-800">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-blue-700 dark:text-blue-300">
+                  <Cloud className="mr-2" size={20} />
+                  {language === 'english' ? 'Weather Forecast' : language === 'hindi' ? 'मौसम का पूर्वानुमान' : 'ಹವಾಮಾನ ಮುನ್ಸೂಚನೆ'}
+                </CardTitle>
                 <CardDescription>
-                  कृपया अपनी किसान प्रोफ़ाइल बनाएं ताकि आप ऋण के लिए आवेदन कर सकें
-                  (Please create your farmer profile to apply for loans)
+                  {language === 'english' 
+                    ? 'Real-time weather updates for your location' 
+                    : language === 'hindi' 
+                      ? 'आपके स्थान के लिए रीयल-टाइम मौसम अपडेट' 
+                      : 'ನಿಮ್ಮ ಸ್ಥಳಕ್ಕೆ ನೈಜ-ಸಮಯದ ಹವಾಮಾನ ನವೀಕರಣಗಳು'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <FarmerProfile 
-                  user={user} 
-                  onProfileCreated={handleProfileCreated} 
-                  mode="create" 
-                />
+                <LiveDataWidget widgetType="weather" language={language} />
               </CardContent>
             </Card>
-          ) : (
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid grid-cols-4 w-full max-w-md">
-                <TabsTrigger value="overview">ओवरव्यू (Overview)</TabsTrigger>
-                <TabsTrigger value="profile">प्रोफ़ाइल (Profile)</TabsTrigger>
-                <TabsTrigger value="apply">ऋण आवेदन (Apply)</TabsTrigger>
-                <TabsTrigger value="history">इतिहास (History)</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="overview" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-green-700 dark:text-green-300">
+                  <Tractor className="mr-2" size={20} />
+                  {language === 'english' ? 'Farm Planning' : language === 'hindi' ? 'कृषि योजना' : 'ಕೃಷಿ ಯೋಜನೆ'}
+                </CardTitle>
+                <CardDescription>
+                  {language === 'english' 
+                    ? 'Plan your farm operations intelligently' 
+                    : language === 'hindi' 
+                      ? 'अपने कृषि कार्यों की बुद्धिमानी से योजना बनाएं' 
+                      : 'ನಿಮ್ಮ ಕೃಷಿ ಕಾರ್ಯಾಚರಣೆಗಳನ್ನು ಬುದ್ಧಿವಂತಿಕೆಯಿಂದ ಯೋಜಿಸಿ'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pb-2">
+                <div className="h-48 relative overflow-hidden rounded-md bg-green-200/50 dark:bg-green-900/30">
+                  <Map className="absolute inset-0 m-auto h-16 w-16 text-green-500/40" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Link to="/farm-planner">
+                      <Button className="bg-green-600 hover:bg-green-700">
+                        {language === 'english' 
+                          ? 'Open Farm Planner' 
+                          : language === 'hindi' 
+                            ? 'फार्म प्लानर खोलें' 
+                            : 'ಕೃಷಿ ಯೋಜಕವನ್ನು ತೆರೆಯಿರಿ'}
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="pt-0">
+                <p className="text-xs text-green-700 dark:text-green-300">
+                  {language === 'english' 
+                    ? 'Access AI-powered crop recommendations based on your location and preferences' 
+                    : language === 'hindi' 
+                      ? 'आपके स्थान और प्राथमिकताओं के आधार पर AI-संचालित फसल अनुशंसाओं तक पहुंचें' 
+                      : 'ನಿಮ್ಮ ಸ್ಥಳ ಮತ್ತು ಆದ್ಯತೆಗಳ ಆಧಾರದ ಮೇಲೆ AI-ಪವರ್ಡ್ ಬೆಳೆ ಶಿಫಾರಸುಗಳನ್ನು ಪಡೆಯಿರಿ'}
+                </p>
+              </CardFooter>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border-amber-200 dark:border-amber-800">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-amber-700 dark:text-amber-300">
+                  <BarChart4 className="mr-2" size={20} />
+                  {language === 'english' ? 'Market Prices' : language === 'hindi' ? 'बाजार मूल्य' : 'ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು'}
+                </CardTitle>
+                <CardDescription>
+                  {language === 'english' 
+                    ? 'Live market prices from local mandis' 
+                    : language === 'hindi' 
+                      ? 'स्थानीय मंडियों से लाइव बाजार मूल्य' 
+                      : 'ಸ್ಥಳೀಯ ಮಂಡಿಗಳಿಂದ ಲೈವ್ ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <LiveDataWidget widgetType="mandi" language={language} />
+              </CardContent>
+            </Card>
+          </div>
+
+          <Tabs defaultValue="profile" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
+              <TabsTrigger value="profile">
+                {language === 'english' ? 'Profile' : language === 'hindi' ? 'प्रोफाइल' : 'ಪ್ರೊಫೈಲ್'}
+              </TabsTrigger>
+              <TabsTrigger value="loans">
+                {language === 'english' ? 'Loans' : language === 'hindi' ? 'ऋण' : 'ಸಾಲಗಳು'}
+              </TabsTrigger>
+              <TabsTrigger value="chatbot">
+                {language === 'english' ? 'Ask Expert' : language === 'hindi' ? 'विशेषज्ञ से पूछें' : 'ತಜ್ಞರನ್ನು ಕೇಳಿ'}
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="profile">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FarmerProfile />
+                <CreditTracker />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="loans">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <LoanApplicationForm />
+                <LoanApplicationList />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="chatbot">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+                <div className="md:col-span-3">
+                  <ChatbotWidget />
+                </div>
+                <div className="md:col-span-2">
                   <Card>
                     <CardHeader>
-                      <CardTitle>क्रेडिट स्कोर (Credit Score)</CardTitle>
+                      <CardTitle className="flex items-center">
+                        <Lightbulb className="mr-2 text-amber-500" size={20} />
+                        {language === 'english' ? 'Farming Tips' : language === 'hindi' ? 'कृषि संबंधी सुझाव' : 'ಕೃಷಿ ಸಲಹೆಗಳು'}
+                      </CardTitle>
                       <CardDescription>
-                        आपका वर्तमान क्रेडिट स्कोर और ऋण पात्रता
-                        (Your current credit score and loan eligibility)
+                        {language === 'english' 
+                          ? 'Expert recommendations for your farm' 
+                          : language === 'hindi' 
+                            ? 'आपके खेत के लिए विशेषज्ञ अनुशंसाएँ' 
+                            : 'ನಿಮ್ಮ ಕೃಷಿಗೆ ತಜ್ಞರ ಶಿಫಾರಸುಗಳು'}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <CreditTracker creditScore={farmerProfile.credit_score} />
+                      <ul className="space-y-2">
+                        <li className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-md">
+                          {language === 'english' 
+                            ? 'Rotate crops to maintain soil health and prevent pest buildup.' 
+                            : language === 'hindi' 
+                              ? 'मिट्टी के स्वास्थ्य को बनाए रखने और कीटों के जमाव को रोकने के लिए फसलों का चक्रण करें।' 
+                              : 'ಮಣ್ಣಿನ ಆರೋಗ್ಯವನ್ನು ಕಾಪಾಡಿಕೊಳ್ಳಲು ಮತ್ತು ಕೀಟಗಳ ಸಂಗ್ರಹವನ್ನು ತಡೆಯಲು ಬೆಳೆಗಳನ್ನು ತಿರುಗಿಸಿ.'}
+                        </li>
+                        <li className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-md">
+                          {language === 'english' 
+                            ? 'Implement drip irrigation to save water and improve yield.' 
+                            : language === 'hindi' 
+                              ? 'पानी बचाने और उपज में सुधार के लिए ड्रिप सिंचाई लागू करें।' 
+                              : 'ನೀರನ್ನು ಉಳಿಸಲು ಮತ್ತು ಇಳುವರಿಯನ್ನು ಸುಧಾರಿಸಲು ಹನಿ ನೀರಾವರಿಯನ್ನು ಅಳವಡಿಸಿ.'}
+                        </li>
+                        <li className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-md">
+                          {language === 'english' 
+                            ? 'Use organic fertilizers to improve soil health long-term.' 
+                            : language === 'hindi' 
+                              ? 'दीर्घकालिक मिट्टी के स्वास्थ्य में सुधार के लिए जैविक उर्वरकों का उपयोग करें।' 
+                              : 'ದೀರ್ಘಾವಧಿಯ ಮಣ್ಣಿನ ಆರೋಗ್ಯವನ್ನು ಸುಧಾರಿಸಲು ಸಾವಯವ ಗೊಬ್ಬರಗಳನ್ನು ಬಳಸಿ.'}
+                        </li>
+                      </ul>
                     </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>प्रोफ़ाइल संक्षेप (Profile Summary)</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <dl className="space-y-2">
-                        <div className="flex justify-between">
-                          <dt className="font-medium">नाम (Name):</dt>
-                          <dd>{farmerProfile.name}</dd>
-                        </div>
-                        <div className="flex justify-between">
-                          <dt className="font-medium">स्थान (Location):</dt>
-                          <dd>{farmerProfile.location}</dd>
-                        </div>
-                        <div className="flex justify-between">
-                          <dt className="font-medium">भूमि का आकार (Land Size):</dt>
-                          <dd>{farmerProfile.land_size} हेक्टेयर</dd>
-                        </div>
-                        <div className="flex justify-between">
-                          <dt className="font-medium">फसल प्रकार (Crop Type):</dt>
-                          <dd>{farmerProfile.crop_type}</dd>
-                        </div>
-                      </dl>
-                    </CardContent>
-                    <CardFooter>
-                      <Button variant="outline" onClick={() => navigateToTab("profile")}>
-                        प्रोफ़ाइल संपादित करें (Edit Profile)
-                      </Button>
-                    </CardFooter>
                   </Card>
                 </div>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle>हाल के ऋण आवेदन (Recent Loan Applications)</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <LoanApplicationList userId={user?.id} limit={3} />
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" onClick={() => navigateToTab("history")}>
-                      सभी आवेदन देखें (View All Applications)
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="profile">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>किसान प्रोफ़ाइल (Farmer Profile)</CardTitle>
-                    <CardDescription>
-                      अपनी प्रोफ़ाइल जानकारी अपडेट करें
-                      (Update your profile information)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <FarmerProfile 
-                      user={user} 
-                      onProfileUpdated={handleProfileUpdated} 
-                      mode="edit" 
-                      existingProfile={farmerProfile} 
-                    />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="apply">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>ऋण के लिए आवेदन करें (Apply for Loan)</CardTitle>
-                    <CardDescription>
-                      कृपया अपने ऋण आवेदन के विवरण भरें
-                      (Please fill in the details for your loan application)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <LoanApplicationForm 
-                      userId={user?.id} 
-                      creditScore={farmerProfile.credit_score} 
-                    />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="history">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>ऋण आवेदन इतिहास (Loan Application History)</CardTitle>
-                    <CardDescription>
-                      आपके सभी ऋण आवेदनों की स्थिति देखें
-                      (View the status of all your loan applications)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <LoanApplicationList userId={user?.id} />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          )}
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
-      
+
       <Footer />
+
+      {/* Location Access Popup */}
+      <LocationAccessPopup 
+        open={showLocationPopup} 
+        onOpenChange={setShowLocationPopup}
+        onLocationGranted={handleLocationGranted}
+      />
     </div>
   );
 };

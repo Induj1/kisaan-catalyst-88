@@ -13,6 +13,7 @@ import Government from "./pages/Government";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
+import FarmPlanner from "./pages/FarmPlanner";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/farm-planner" 
+        element={
+          <ProtectedRoute>
+            <FarmPlanner />
           </ProtectedRoute>
         } 
       />

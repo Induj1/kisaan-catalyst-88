@@ -90,12 +90,104 @@ export type Database = {
         }
         Relationships: []
       }
+      marketplace_listings: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          image_url: string | null
+          price: number
+          seller_id: string
+          seller_location: string
+          seller_name: string
+          status: string
+          title: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          image_url?: string | null
+          price: number
+          seller_id: string
+          seller_location: string
+          seller_name: string
+          status?: string
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          price?: number
+          seller_id?: string
+          seller_location?: string
+          seller_name?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      marketplace_transactions: {
+        Row: {
+          amount: number
+          buyer_id: string
+          created_at: string
+          credits_used: number | null
+          id: string
+          product_id: string
+          product_title: string | null
+          seller_id: string
+          status: string
+        }
+        Insert: {
+          amount: number
+          buyer_id: string
+          created_at?: string
+          credits_used?: number | null
+          id?: string
+          product_id: string
+          product_title?: string | null
+          seller_id: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          buyer_id?: string
+          created_at?: string
+          credits_used?: number | null
+          id?: string
+          product_id?: string
+          product_title?: string | null
+          seller_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_transactions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment: {
+        Args: {
+          row_id: string
+          amount: number
+        }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

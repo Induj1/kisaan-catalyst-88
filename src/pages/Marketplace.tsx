@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseExt } from '@/integrations/supabase/clientExt';
 import ProductCard from '@/components/marketplace/ProductCard';
 import ProductForm from '@/components/marketplace/ProductForm';
 import { Package, ShoppingCart, DollarSign } from "lucide-react";
@@ -23,12 +22,12 @@ import {
 const Marketplace = () => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [products, setProducts] = useState([]);
-  const [myListings, setMyListings] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [myListings, setMyListings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState<any>(null);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [confirmPurchaseOpen, setConfirmPurchaseOpen] = useState(false);
 
   useEffect(() => {
@@ -40,7 +39,7 @@ const Marketplace = () => {
   
   const fetchUserProfile = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseExt
         .from('farmer_profiles')
         .select('*')
         .eq('user_id', user.id)
@@ -50,7 +49,7 @@ const Marketplace = () => {
       setProfile(data);
       
       // Fetch user's listings
-      const { data: listingsData, error: listingsError } = await supabase
+      const { data: listingsData, error: listingsError } = await supabaseExt
         .from('marketplace_listings')
         .select('*')
         .eq('seller_id', user.id)
@@ -66,7 +65,7 @@ const Marketplace = () => {
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseExt
         .from('marketplace_listings')
         .select('*')
         .eq('status', 'active')
@@ -90,7 +89,7 @@ const Marketplace = () => {
     setRefreshKey(prev => prev + 1);
   };
   
-  const handleBuyProduct = (id) => {
+  const handleBuyProduct = (id: string) => {
     const product = products.find(p => p.id === id);
     setSelectedProduct(product);
     setConfirmPurchaseOpen(true);
@@ -101,7 +100,7 @@ const Marketplace = () => {
     
     try {
       // First get buyer's credit balance
-      const { data: buyerData, error: buyerError } = await supabase
+      const { data: buyerData, error: buyerError } = await supabaseExt
         .from('farmer_profiles')
         .select('credit_score')
         .eq('user_id', user.id)
@@ -116,7 +115,7 @@ const Marketplace = () => {
       );
       
       // Complete the purchase
-      const { error: purchaseError } = await supabase
+      const { error: purchaseError } = await supabaseExt
         .from('marketplace_transactions')
         .insert({
           product_id: selectedProduct.id,
@@ -124,13 +123,14 @@ const Marketplace = () => {
           seller_id: selectedProduct.seller_id,
           amount: selectedProduct.price,
           credits_used: creditsToUse,
-          status: 'completed'
+          status: 'completed',
+          product_title: selectedProduct.title
         });
         
       if (purchaseError) throw purchaseError;
       
       // Update product status
-      const { error: updateError } = await supabase
+      const { error: updateError } = await supabaseExt
         .from('marketplace_listings')
         .update({ status: 'sold' })
         .eq('id', selectedProduct.id);
@@ -138,7 +138,7 @@ const Marketplace = () => {
       if (updateError) throw updateError;
       
       // Update buyer credits (deduct used credits)
-      const { error: buyerUpdateError } = await supabase
+      const { error: buyerUpdateError } = await supabaseExt
         .from('farmer_profiles')
         .update({ 
           credit_score: buyerData.credit_score - creditsToUse 
@@ -148,17 +148,10 @@ const Marketplace = () => {
       if (buyerUpdateError) throw buyerUpdateError;
       
       // Update seller credits (add earned credits)
-      const { error: sellerUpdateError } = await supabase
-        .from('farmer_profiles')
-        .update({ 
-          credit_score: supabase.rpc('increment', { 
-            row_id: selectedProduct.seller_id,
-            amount: 50 // Seller earns 50 credits per sale
-          })
-        })
-        .eq('user_id', selectedProduct.seller_id);
-        
-      if (sellerUpdateError) throw sellerUpdateError;
+      const sellerCredits = await supabaseExt.rpc('increment', { 
+        row_id: selectedProduct.seller_id,
+        amount: 50 // Seller earns 50 credits per sale
+      });
       
       toast({
         title: "Purchase Successful",
@@ -168,13 +161,20 @@ const Marketplace = () => {
       setConfirmPurchaseOpen(false);
       setSelectedProduct(null);
       setRefreshKey(prev => prev + 1);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Purchase error:", error);
       toast({
         variant: "destructive",
         title: "Purchase Failed",
         description: error.message || "Failed to complete purchase",
       });
+    }
+  };
+  
+  const handleSellTabClick = () => {
+    const sellTab = document.querySelector('[value="sell"]');
+    if (sellTab instanceof HTMLElement) {
+      sellTab.click();
     }
   };
   
@@ -239,7 +239,7 @@ const Marketplace = () => {
                     There are no products listed in the marketplace yet.
                   </p>
                   <div className="mt-6">
-                    <Button onClick={() => document.querySelector('[value="sell"]').click()}>
+                    <Button onClick={handleSellTabClick}>
                       Be the first to sell
                     </Button>
                   </div>
@@ -285,7 +285,7 @@ const Marketplace = () => {
                               disabled={listing.status !== 'active'}
                               onClick={async () => {
                                 try {
-                                  await supabase
+                                  await supabaseExt
                                     .from('marketplace_listings')
                                     .update({ status: 'inactive' })
                                     .eq('id', listing.id);

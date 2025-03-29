@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseExt } from '@/integrations/supabase/clientExt';
 import { Loader2 } from 'lucide-react';
 
 interface CreditTrackerProps {
@@ -24,7 +24,7 @@ const CreditTracker: React.FC<CreditTrackerProps> = ({
 }) => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [creditScore, setCreditScore] = useState(initialCreditScore);
   const [totalCredits, setTotalCredits] = useState(initialTotalCredits);
   const [usedCredits, setUsedCredits] = useState(initialUsedCredits);
@@ -48,7 +48,7 @@ const CreditTracker: React.FC<CreditTrackerProps> = ({
     setIsLoading(true);
     try {
       // Fetch user credit score
-      const { data: profileData, error: profileError } = await supabase
+      const { data: profileData, error: profileError } = await supabaseExt
         .from('farmer_profiles')
         .select('credit_score')
         .eq('user_id', user.id)
@@ -61,7 +61,7 @@ const CreditTracker: React.FC<CreditTrackerProps> = ({
       }
       
       // Fetch recent transactions
-      const { data: transactionsData, error: transactionsError } = await supabase
+      const { data: transactionsData, error: transactionsError } = await supabaseExt
         .from('marketplace_transactions')
         .select('*')
         .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
@@ -95,7 +95,7 @@ const CreditTracker: React.FC<CreditTrackerProps> = ({
   };
   
   // Calculate available credits
-  const availableCredits = creditScore;
+  const availableCredits = creditScore !== undefined ? creditScore : 0;
   const usedPercentage = Math.min(100, Math.round((usedCredits / totalCredits) * 100));
   
   return (

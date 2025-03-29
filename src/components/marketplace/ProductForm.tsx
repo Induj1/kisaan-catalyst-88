@@ -17,7 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseExt } from '@/integrations/supabase/clientExt';
 
 const formSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
@@ -63,7 +63,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSuccess, sellerProfile }) =
     setIsLoading(true);
     
     try {
-      const { error } = await supabase
+      const { error } = await supabaseExt
         .from('marketplace_listings')
         .insert({
           title: values.title,

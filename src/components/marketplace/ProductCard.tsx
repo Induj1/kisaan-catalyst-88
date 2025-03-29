@@ -50,7 +50,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <CardTitle className="line-clamp-1">{title}</CardTitle>
         <CardDescription className="flex items-center">
           <Tag size={14} className="mr-1" />
-          <span>₹{price} or {Math.round(price / 10)} credits</span>
+          <span>₹{price} or {Math.round(Number(price) / 10)} credits</span>
         </CardDescription>
       </CardHeader>
       

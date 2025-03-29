@@ -6,12 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
-import FarmerProfile from '@/components/FarmerProfile';
-import CreditTracker from '@/components/CreditTracker';
-import ChatbotWidget from '@/components/ChatbotWidget';
 import LocationAccessPopup from '@/components/LocationAccessPopup';
 import { Cloud, Tractor, BarChart4, Lightbulb, ShoppingCart, Droplets, Calendar, SlidersHorizontal } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 
 const Dashboard = () => {
   const { user, isNewUser, setIsNewUser } = useAuth();
@@ -21,18 +17,27 @@ const Dashboard = () => {
   const [longitude, setLongitude] = useState<number | null>(null);
   const [isHighContrast, setIsHighContrast] = useState(false);
   const [language, setLanguage] = useState<'english' | 'hindi' | 'kannada'>('hindi');
-  const [creditScore, setCreditScore] = useState(650); // Default credit score
-  const [farmerProfile, setFarmerProfile] = useState(null);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    // If location not already granted, check if we can get it
-    if (!locationGranted && navigator.geolocation) {
+    // Check stored location first
+    const storedLat = localStorage.getItem('userLatitude');
+    const storedLng = localStorage.getItem('userLongitude');
+    
+    if (storedLat && storedLng) {
+      setLatitude(parseFloat(storedLat));
+      setLongitude(parseFloat(storedLng));
+      setLocationGranted(true);
+    } else if (!locationGranted && navigator.geolocation) {
+      // If no stored location, try to get it
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setLatitude(position.coords.latitude);
           setLongitude(position.coords.longitude);
           setLocationGranted(true);
+          
+          // Store location in localStorage
+          localStorage.setItem('userLatitude', position.coords.latitude.toString());
+          localStorage.setItem('userLongitude', position.coords.longitude.toString());
         },
         (error) => {
           console.log("Geolocation error or permission denied:", error);
@@ -46,25 +51,7 @@ const Dashboard = () => {
       // Reset the newUser flag
       setIsNewUser(false);
     }
-
-    // Fetch profile data for the user if they are logged in
-    const fetchProfileData = async () => {
-      if (user) {
-        const { data, error } = await supabase
-          .from('farmer_profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-          
-        if (!error && data) {
-          setCreditScore(data.credit_score);
-          setFarmerProfile(data);
-        }
-      }
-    };
-    
-    fetchProfileData();
-  }, [isNewUser, setIsNewUser, user, refreshKey]);
+  }, [isNewUser, setIsNewUser, locationGranted]);
 
   const toggleContrast = () => {
     setIsHighContrast(!isHighContrast);
@@ -75,10 +62,10 @@ const Dashboard = () => {
     setLatitude(lat);
     setLongitude(lng);
     setLocationGranted(true);
-  };
-  
-  const handleProfileRefresh = () => {
-    setRefreshKey(prev => prev + 1);
+    
+    // Store location in localStorage
+    localStorage.setItem('userLatitude', lat.toString());
+    localStorage.setItem('userLongitude', lng.toString());
   };
 
   // Feature menu items
@@ -152,7 +139,7 @@ const Dashboard = () => {
 
       <main className="flex-grow p-4 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
         <div className="container mx-auto">
-          <div className="mb-6">
+          <div className="mb-8">
             <h1 className="text-2xl font-bold">
               {language === 'english' 
                 ? 'Welcome to KisaanMitra' 
@@ -169,15 +156,13 @@ const Dashboard = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {featureItems.map((item, index) => (
               <Link to={item.route} key={index}>
                 <Card className="h-full hover:shadow-md transition-shadow duration-300 border-t-4" style={{ borderTopColor: item.color }}>
                   <CardContent className="p-6">
-                    <div className="flex items-start">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${item.color.replace('bg-', 'text-')} mb-4`}>
-                        <item.icon size={28} className="text-white" />
-                      </div>
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${item.color} mb-4`}>
+                      <item.icon size={24} className="text-white" />
                     </div>
                     <h3 className="text-lg font-medium mb-2">{item.title}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">{item.description}</p>
@@ -185,18 +170,6 @@ const Dashboard = () => {
                 </Card>
               </Link>
             ))}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FarmerProfile 
-              user={user} 
-              mode="edit" 
-              onProfileUpdated={handleProfileRefresh} 
-            />
-            <CreditTracker 
-              creditScore={creditScore}
-              onRefresh={handleProfileRefresh}
-            />
           </div>
         </div>
       </main>

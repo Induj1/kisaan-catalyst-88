@@ -39,13 +39,25 @@ const LocationAccessPopup: React.FC<LocationAccessPopupProps> = ({
     setIsLoading(true);
     
     if (navigator.geolocation) {
+      // Use high accuracy option to get more precise location
+      const options = {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      };
+      
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
+          console.log("Location obtained:", latitude, longitude);
           
           if (onLocationGranted) {
             onLocationGranted(latitude, longitude);
           }
+          
+          // Store location in localStorage for persistence
+          localStorage.setItem('userLatitude', latitude.toString());
+          localStorage.setItem('userLongitude', longitude.toString());
           
           toast({
             title: "स्थान प्राप्त किया गया",
@@ -65,7 +77,8 @@ const LocationAccessPopup: React.FC<LocationAccessPopupProps> = ({
           });
           
           setIsLoading(false);
-        }
+        },
+        options
       );
     } else {
       toast({

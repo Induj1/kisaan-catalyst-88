@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Cloud, Sun, Droplets, Thermometer, ArrowDown, ArrowUp, MapPin } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +26,6 @@ interface MandiData {
   }>;
 }
 
-// Default weather data
 const defaultWeatherData: WeatherData = {
   location: "Location unavailable",
   temperature: 28,
@@ -40,7 +38,6 @@ const defaultWeatherData: WeatherData = {
   ]
 };
 
-// Default mandi data
 const defaultMandiData: MandiData = {
   mandiName: "Nearest Mandi",
   crops: [
@@ -77,39 +74,44 @@ const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({
   const [mandiData, setMandiData] = useState<MandiData>(defaultMandiData);
   
   useEffect(() => {
-    // Simulate API loading
     setIsLoading(true);
     
     const fetchTimer = setTimeout(() => {
-      if (latitude && longitude) {
-        console.log("Fetching with coords:", latitude, longitude);
-        fetchWeatherByLocation(latitude, longitude);
-        fetchNearbyMandi(latitude, longitude);
+      let storedLat = localStorage.getItem('userLatitude');
+      let storedLng = localStorage.getItem('userLongitude');
+      
+      if ((latitude && longitude) || (storedLat && storedLng)) {
+        const lat = latitude || parseFloat(storedLat || '0');
+        const lng = longitude || parseFloat(storedLng || '0');
+        
+        console.log("Fetching with coords:", lat, lng);
+        
+        if (latitude && longitude) {
+          localStorage.setItem('userLatitude', latitude.toString());
+          localStorage.setItem('userLongitude', longitude.toString());
+        }
+        
+        fetchWeatherByLocation(lat, lng);
+        fetchNearbyMandi(lat, lng);
       } else {
         console.log("No location available, using defaults");
         setWeatherData(defaultWeatherData);
         setMandiData(defaultMandiData);
         setIsLoading(false);
       }
-    }, 1500);
+    }, 1000);
     
     return () => clearTimeout(fetchTimer);
   }, [latitude, longitude]);
   
   const fetchWeatherByLocation = async (lat: number, lng: number) => {
     try {
-      // In a real implementation, we would call a weather API with the coordinates
-      // For now, we'll simulate with random data based on the coordinates
-      
-      // Get location name from coordinates using reverse geocoding
       const locationName = await simulateReverseGeocode(lat, lng);
       
-      // Generate simulated weather data
-      const temperature = Math.round(15 + Math.random() * 25); // 15-40°C
-      const humidity = Math.round(30 + Math.random() * 60); // 30-90%
-      const rainfall = Math.random() > 0.7 ? Math.round(Math.random() * 50) : 0; // 0-50mm
+      const temperature = Math.round(15 + Math.random() * 25);
+      const humidity = Math.round(30 + Math.random() * 60);
+      const rainfall = Math.random() > 0.7 ? Math.round(Math.random() * 50) : 0;
       
-      // Generate 3-day forecast
       const forecast = [
         { 
           day: "Today", 
@@ -118,12 +120,12 @@ const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({
         },
         { 
           day: "Tomorrow", 
-          temp: temperature + Math.round(Math.random() * 4 - 2), // ±2°C
+          temp: temperature + Math.round(Math.random() * 4 - 2),
           condition: Math.random() > 0.5 ? "Sunny" : "Cloudy"
         },
         { 
           day: "Wed", 
-          temp: temperature + Math.round(Math.random() * 6 - 3), // ±3°C
+          temp: temperature + Math.round(Math.random() * 6 - 3),
           condition: Math.random() > 0.7 ? "Cloudy" : "Sunny"
         }
       ];
@@ -146,14 +148,9 @@ const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({
   
   const fetchNearbyMandi = async (lat: number, lng: number) => {
     try {
-      // In a real implementation, we would call an API to get nearby mandis
-      // For now, we'll simulate with random data based on the coordinates
-      
-      // Get location name from coordinates
       const locationName = await simulateReverseGeocode(lat, lng);
       const mandiName = `${locationName.split(',')[0]} Mandi`;
       
-      // Generate simulated crop prices
       const crops = [
         { 
           name: "Wheat", 
@@ -195,10 +192,6 @@ const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({
   };
   
   const simulateReverseGeocode = async (lat: number, lng: number): Promise<string> => {
-    // In a real implementation, this would call a reverse geocoding API
-    // For now, return a simulated location based on coordinates
-    
-    // This is a very simplified simulation
     const locations = [
       "Mumbai, Maharashtra",
       "Delhi, NCR",
@@ -212,13 +205,11 @@ const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({
       "Lucknow, Uttar Pradesh"
     ];
     
-    // Deterministically select a location based on coordinates
-    const locationIndex = Math.abs(Math.round((lat * lng) % locations.length));
+    const locationIndex = Math.abs(Math.floor((lat * 10) % locations.length));
     
-    // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    return locations[locationIndex];
+    return `Your Location (${locations[locationIndex]})`;
   };
 
   const renderLocationPrompt = () => (
@@ -357,7 +348,6 @@ const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({
     </Card>
   );
 
-  // Treat 'market' and 'mandi' types the same way
   return widgetType === 'weather' ? renderWeatherWidget() : renderMandiWidget();
 };
 

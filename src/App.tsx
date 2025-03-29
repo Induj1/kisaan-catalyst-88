@@ -19,6 +19,8 @@ import MarketPrices from "./pages/MarketPrices";
 import Loans from "./pages/Loans";
 import AskExpert from "./pages/AskExpert";
 import NotFound from "./pages/NotFound";
+import CropCalendar from "./pages/CropCalendar";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -99,6 +101,22 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <AskExpert />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/crop-calendar" 
+        element={
+          <ProtectedRoute>
+            <CropCalendar />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/settings" 
+        element={
+          <ProtectedRoute>
+            <Settings />
           </ProtectedRoute>
         } 
       />

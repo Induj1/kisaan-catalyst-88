@@ -72,7 +72,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [language, setLanguageState] = useState<Language>(() => {
     // Try to get the saved language from localStorage
     const savedLanguage = localStorage.getItem('language');
-    return (savedLanguage as Language) || 'english';
+    return (savedLanguage as Language) || 'english'; // Default to English
   });
 
   const setLanguage = (newLanguage: Language) => {

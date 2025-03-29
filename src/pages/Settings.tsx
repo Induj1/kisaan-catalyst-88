@@ -1,4 +1,5 @@
-import { UserSettings } from "@/components/UserSettings";
+
+import UserSettings from "@/components/UserSettings";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import PageLayout from "@/components/PageLayout";

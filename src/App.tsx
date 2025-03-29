@@ -24,6 +24,13 @@ import NotFound from "./pages/NotFound";
 import CropCalendar from "./pages/CropCalendar";
 import Settings from "./pages/Settings";
 
+// Import feature detail pages
+import FarmPlannerDetail from "./pages/features/FarmPlannerDetail";
+import MarketplaceDetail from "./pages/features/MarketplaceDetail";
+import WeatherDetail from "./pages/features/WeatherDetail";
+import AskExpertDetail from "./pages/features/AskExpertDetail";
+import GovernmentSchemesDetail from "./pages/features/GovernmentSchemesDetail";
+
 const queryClient = new QueryClient();
 
 // Protected route component
@@ -50,6 +57,14 @@ const AppRoutes = () => {
       <Route path="/government" element={<Government />} />
       <Route path="/sign-in" element={<SignIn />} />
       <Route path="/sign-up" element={<SignUp />} />
+      
+      {/* Feature Detail Pages */}
+      <Route path="/features/farm-planner" element={<FarmPlannerDetail />} />
+      <Route path="/features/marketplace" element={<MarketplaceDetail />} />
+      <Route path="/features/weather" element={<WeatherDetail />} />
+      <Route path="/features/ask-expert" element={<AskExpertDetail />} />
+      <Route path="/features/government-schemes" element={<GovernmentSchemesDetail />} />
+      
       <Route 
         path="/dashboard" 
         element={

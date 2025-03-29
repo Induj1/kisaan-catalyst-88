@@ -69,88 +69,56 @@ const Dashboard = () => {
     {
       icon: Cloud,
       title: translate('weather'),
-      description: language === 'english' 
-        ? 'Check forecasts and alerts' 
-        : language === 'hindi' 
-          ? 'पूर्वानुमान और अलर्ट देखें' 
-          : 'ಮುನ್ಸೂಚನೆಗಳು ಮತ್ತು ಎಚ್ಚರಿಕೆಗಳನ್ನು ಪರಿಶೀಲಿಸಿ',
+      description: translate('checkForecasts'),
       route: '/weather',
       color: 'bg-blue-500',
     },
     {
       icon: Tractor,
       title: translate('farmPlanner'),
-      description: language === 'english' 
-        ? 'Plan your farm activities' 
-        : language === 'hindi' 
-          ? 'अपनी कृषि गतिविधियों की योजना बनाएं' 
-          : 'ನಿಮ್ಮ ಕೃಷಿ ಚಟುವಟಿಕೆಗಳನ್ನು ಯೋಜಿಸಿ',
+      description: translate('planFarmActivities'),
       route: '/farm-planner',
       color: 'bg-green-500',
     },
     {
       icon: BarChart4,
       title: translate('marketplace'),
-      description: language === 'english' 
-        ? 'Check current crop prices' 
-        : language === 'hindi' 
-          ? 'वर्तमान फसल मूल्य देखें' 
-          : 'ಪ್ರಸ್ತುತ ಬೆಳೆ ಬೆಲೆಗಳನ್ನು ಪರಿಶೀಲಿಸಿ',
+      description: translate('checkCropPrices'),
       route: '/market-prices',
       color: 'bg-amber-500',
     },
     {
       icon: ShoppingCart,
       title: translate('marketplace'),
-      description: language === 'english' 
-        ? 'Buy and sell products' 
-        : language === 'hindi' 
-          ? 'उत्पादों को खरीदें और बेचें' 
-          : 'ಉತ್ಪನ್ನಗಳನ್ನು ಖರೀದಿಸಿ ಮತ್ತು ಮಾರಾಟ ಮಾಡಿ',
+      description: translate('buyAndSellProducts'),
       route: '/marketplace',
       color: 'bg-purple-500',
     },
     {
       icon: Droplets,
       title: translate('loans'),
-      description: language === 'english' 
-        ? 'Apply for agricultural loans' 
-        : language === 'hindi' 
-          ? 'कृषि ऋण के लिए आवेदन करें' 
-          : 'ಕೃಷಿ ಸಾಲಗಳಿಗೆ ಅರ್ಜಿ ಸಲ್ಲಿಸಿ',
+      description: translate('applyForLoans'),
       route: '/loans',
       color: 'bg-teal-500',
     },
     {
       icon: Lightbulb,
-      title: language === 'english' ? 'Ask Expert' : language === 'hindi' ? 'विशेषज्ञ से पूछें' : 'ತಜ್ಞರನ್ನು ಕೇಳಿ',
-      description: language === 'english' 
-        ? 'Get advice from AI assistant' 
-        : language === 'hindi' 
-          ? 'AI सहायक से सलाह प्राप्त करें' 
-          : 'AI ಸಹಾಯಕರಿಂದ ಸಲಹೆ ಪಡೆಯಿರಿ',
+      title: translate('askExpert'),
+      description: translate('getAIAdvice'),
       route: '/ask-expert',
       color: 'bg-orange-500',
     },
     {
       icon: Calendar,
-      title: language === 'english' ? 'Crop Calendar' : language === 'hindi' ? 'फसल कैलेंडर' : 'ಬೆಳೆ ಕ್ಯಾಲೆಂಡರ್',
-      description: language === 'english' 
-        ? 'Seasonal planting guide' 
-        : language === 'hindi' 
-          ? 'मौसमी रोपण मार्गदर्शिका' 
-          : 'ಋತುವಿನ ಬೇಸಾಯ ಮಾರ್ಗದರ್ಶಿ',
+      title: translate('cropCalendar'),
+      description: translate('seasonalPlanting'),
       route: '/crop-calendar',
       color: 'bg-indigo-500',
     },
     {
       icon: SlidersHorizontal,
       title: translate('settings'),
-      description: language === 'english' 
-        ? 'Manage your preferences' 
-        : language === 'hindi' 
-          ? 'अपनी प्राथमिकताओं का प्रबंधन करें' 
-          : 'ನಿಮ್ಮ ಆದ್ಯತೆಗಳನ್ನು ನಿರ್ವಹಿಸಿ',
+      description: translate('managePreferences'),
       route: '/settings',
       color: 'bg-gray-500',
     },
@@ -164,11 +132,7 @@ const Dashboard = () => {
             {translate('welcome')}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            {language === 'english' 
-              ? 'Your personalized farming assistant' 
-              : language === 'hindi' 
-                ? 'आपका व्यक्तिगत कृषि सहायक' 
-                : 'ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಕೃಷಿ ಸಹಾಯಕ'}
+            {translate('personalizedAssistant')}
           </p>
         </div>
 

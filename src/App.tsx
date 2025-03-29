@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
+import { useState } from "react";
 import Index from "./pages/Index";
 import Features from "./pages/Features";
 import Demo from "./pages/Demo";
@@ -126,18 +128,40 @@ const AppRoutes = () => {
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [isHighContrast, setIsHighContrast] = useState<boolean>(() => {
+    return localStorage.getItem('highContrast') === 'true';
+  });
+  
+  const toggleContrast = () => {
+    const newValue = !isHighContrast;
+    setIsHighContrast(newValue);
+    localStorage.setItem('highContrast', String(newValue));
+    document.documentElement.classList.toggle('high-contrast', newValue);
+  };
+  
+  // Initialize contrast mode from localStorage
+  React.useEffect(() => {
+    document.documentElement.classList.toggle('high-contrast', isHighContrast);
+  }, [isHighContrast]);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <LanguageProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <div className={`min-h-screen flex flex-col ${isHighContrast ? 'high-contrast' : ''}`}>
+                <AppRoutes />
+              </div>
+            </BrowserRouter>
+          </TooltipProvider>
+        </LanguageProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

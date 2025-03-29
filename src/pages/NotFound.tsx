@@ -3,9 +3,12 @@ import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
+import PageLayout from "@/components/PageLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const NotFound = () => {
   const location = useLocation();
+  const { translate } = useLanguage();
 
   useEffect(() => {
     console.error(
@@ -15,25 +18,27 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
-      <div className="text-center max-w-md">
-        <h1 className="text-6xl font-bold text-primary mb-4">404</h1>
-        <p className="text-xl text-gray-700 dark:text-gray-300 mb-6">
-          पेज नहीं मिला<br />
-          <span className="text-lg">Page not found</span>
-        </p>
-        <p className="text-gray-600 dark:text-gray-400 mb-8">
-          The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
-        </p>
-        <Button 
-          onClick={() => window.location.href = '/'}
-          className="bg-primary hover:bg-primary-dark text-white"
-        >
-          <Home className="mr-2" size={18} />
-          Return to Home
-        </Button>
+    <PageLayout>
+      <div className="min-h-[calc(100vh-200px)] flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+        <div className="text-center max-w-md">
+          <h1 className="text-6xl font-bold text-primary mb-4">404</h1>
+          <p className="text-xl text-gray-700 dark:text-gray-300 mb-6">
+            पेज नहीं मिला<br />
+            <span className="text-lg">Page not found</span>
+          </p>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
+          </p>
+          <Button 
+            onClick={() => window.location.href = '/'}
+            className="bg-primary hover:bg-primary-dark text-white"
+          >
+            <Home className="mr-2" size={18} />
+            {translate('home')}
+          </Button>
+        </div>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

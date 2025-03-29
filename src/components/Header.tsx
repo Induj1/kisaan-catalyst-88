@@ -3,19 +3,16 @@ import React from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import Navigation from './Navigation';
+import LanguageSelector from './LanguageSelector';
 
 interface HeaderProps {
   toggleContrast?: () => void;
   isHighContrast?: boolean;
-  language?: 'english' | 'hindi' | 'kannada';
-  setLanguage?: React.Dispatch<React.SetStateAction<'english' | 'hindi' | 'kannada'>>;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
   toggleContrast, 
   isHighContrast,
-  language,
-  setLanguage
 }) => {
   return (
     <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 relative">
@@ -23,39 +20,9 @@ const Header: React.FC<HeaderProps> = ({
       
       {/* Accessibility Controls */}
       {toggleContrast && (
-        <div className="container mx-auto px-4 flex justify-end py-2 bg-gray-50 dark:bg-gray-800">
+        <div className="container mx-auto px-4 flex justify-end items-center py-2 bg-gray-50 dark:bg-gray-800 gap-3">
           {/* Language Selector */}
-          {language && setLanguage && (
-            <div className="flex items-center mr-4">
-              <span className="text-sm text-gray-600 dark:text-gray-400 mr-2">Language:</span>
-              <div className="flex space-x-2">
-                <Button
-                  variant={language === 'english' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setLanguage('english')}
-                  className="text-xs py-1 h-8"
-                >
-                  English
-                </Button>
-                <Button
-                  variant={language === 'hindi' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setLanguage('hindi')}
-                  className="text-xs py-1 h-8"
-                >
-                  हिंदी
-                </Button>
-                <Button
-                  variant={language === 'kannada' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setLanguage('kannada')}
-                  className="text-xs py-1 h-8"
-                >
-                  ಕನ್ನಡ
-                </Button>
-              </div>
-            </div>
-          )}
+          <LanguageSelector />
           
           {/* Contrast Toggle */}
           <Button

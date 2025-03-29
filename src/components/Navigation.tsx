@@ -20,12 +20,14 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Navigation: React.FC = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isOpen, setIsOpen] = React.useState(false);
+  const { translate } = useLanguage();
 
   const handleSignOut = async () => {
     await signOut();
@@ -53,10 +55,10 @@ const Navigation: React.FC = () => {
   };
 
   const navItems = [
-    { to: "/", icon: Home, label: "Home" },
-    { to: "/features", icon: Info, label: "Features" },
-    { to: "/demo", icon: PenSquare, label: "Demo" },
-    { to: "/government", icon: Landmark, label: "Government Schemes" },
+    { to: "/", icon: Home, label: translate('home') },
+    { to: "/features", icon: Info, label: translate('features') },
+    { to: "/demo", icon: PenSquare, label: translate('demo') },
+    { to: "/government", icon: Landmark, label: translate('government') },
   ];
 
   return (
@@ -76,14 +78,14 @@ const Navigation: React.FC = () => {
           
           {user ? (
             <>
-              <NavItem to="/dashboard" icon={UserCircle} label="Dashboard" />
+              <NavItem to="/dashboard" icon={UserCircle} label={translate('dashboard')} />
               <Button 
                 variant="outline" 
                 className="ml-2" 
                 onClick={handleSignOut}
               >
                 <LogOut size={18} className="mr-2" />
-                Sign Out
+                {translate('signOut')}
               </Button>
             </>
           ) : (
@@ -93,7 +95,7 @@ const Navigation: React.FC = () => {
               onClick={() => navigate('/sign-in')}
             >
               <LogIn size={18} className="mr-2" />
-              Sign In
+              {translate('signIn')}
             </Button>
           )}
         </div>
@@ -122,14 +124,14 @@ const Navigation: React.FC = () => {
                   
                   {user ? (
                     <>
-                      <NavItem to="/dashboard" icon={UserCircle} label="Dashboard" />
+                      <NavItem to="/dashboard" icon={UserCircle} label={translate('dashboard')} />
                       <Button 
                         variant="outline" 
                         className="mt-4 w-full justify-start" 
                         onClick={handleSignOut}
                       >
                         <LogOut size={18} className="mr-2" />
-                        Sign Out
+                        {translate('signOut')}
                       </Button>
                     </>
                   ) : (
@@ -142,7 +144,7 @@ const Navigation: React.FC = () => {
                       }}
                     >
                       <LogIn size={18} className="mr-2" />
-                      Sign In
+                      {translate('signIn')}
                     </Button>
                   )}
                 </div>

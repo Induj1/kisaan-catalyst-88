@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Bluetooth, Thermometer, Droplets, Wind, RefreshCw } from "lucide-react";
+import { Wifi, Thermometer, Droplets, Wind, RefreshCw } from "lucide-react";
 
 interface DeviceConnectionDialogProps {
   open: boolean;
@@ -20,6 +21,7 @@ interface SensorReading {
 const DeviceConnectionDialog = ({ open, onOpenChange }: DeviceConnectionDialogProps) => {
   const [connecting, setConnecting] = useState(false);
   const [fetchingData, setFetchingData] = useState<string | null>(null);
+  const [deviceConnected, setDeviceConnected] = useState(false);
   const [sensorReadings, setSensorReadings] = useState<SensorReading[]>([]);
   const { toast } = useToast();
 
@@ -30,6 +32,7 @@ const DeviceConnectionDialog = ({ open, onOpenChange }: DeviceConnectionDialogPr
       // Simulate connection delay
       await new Promise(resolve => setTimeout(resolve, 2000));
       
+      setDeviceConnected(true);
       toast({
         title: "Device Connected",
         description: "Your sensor device has been successfully connected",
@@ -46,6 +49,16 @@ const DeviceConnectionDialog = ({ open, onOpenChange }: DeviceConnectionDialogPr
   };
 
   const fetchSensorData = async (sensorType: string) => {
+    // Check if device is connected
+    if (!deviceConnected) {
+      toast({
+        title: "Error",
+        description: "Sensor device not connected. Please connect your device first.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setFetchingData(sensorType);
     
     try {
@@ -125,10 +138,18 @@ const DeviceConnectionDialog = ({ open, onOpenChange }: DeviceConnectionDialogPr
             className="w-48"
             variant="outline"
           >
-            <Bluetooth className={`mr-2 ${connecting ? 'text-blue-500' : ''}`} />
+            <Wifi className={`mr-2 ${connecting ? 'text-blue-500' : ''}`} />
             {connecting ? 'Connecting...' : 'Connect Device'}
           </Button>
         </div>
+        
+        {!deviceConnected && (
+          <Alert className="mb-4 bg-yellow-50 border-yellow-200">
+            <AlertDescription className="text-yellow-700">
+              Device not connected. Connect your device to access sensor data.
+            </AlertDescription>
+          </Alert>
+        )}
         
         <div className="grid grid-cols-2 gap-3 my-4">
           <Button 

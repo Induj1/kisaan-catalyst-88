@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import PageLayout from '@/components/PageLayout';
 import LocationAccessPopup from '@/components/LocationAccessPopup';
 import SensorDataWidget from '@/components/SensorDataWidget';
 import DeviceConnectionDialog from '@/components/DeviceConnectionDialog';
-import { Cloud, Tractor, BarChart4, Lightbulb, ShoppingCart, Droplets, Calendar, SlidersHorizontal, Bluetooth } from 'lucide-react';
+import { Cloud, Tractor, BarChart4, Lightbulb, ShoppingCart, Droplets, Calendar, SlidersHorizontal, Wifi } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -142,7 +141,7 @@ const Dashboard = () => {
             onClick={() => setShowDeviceDialog(true)}
             className="bg-blue-500 hover:bg-blue-600"
           >
-            <Bluetooth className="mr-2" size={18} />
+            <Wifi className="mr-2" size={18} />
             Connect Device
           </Button>
         </div>

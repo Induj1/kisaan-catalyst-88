@@ -3,19 +3,19 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import { useAuth } from '@/contexts/AuthContext';
 import PageLayout from '@/components/PageLayout';
 import LocationAccessPopup from '@/components/LocationAccessPopup';
 import SensorDataWidget from '@/components/SensorDataWidget';
-import { Cloud, Tractor, BarChart4, Lightbulb, ShoppingCart, Droplets, Calendar, SlidersHorizontal } from 'lucide-react';
+import DeviceConnectionDialog from '@/components/DeviceConnectionDialog';
+import { Cloud, Tractor, BarChart4, Lightbulb, ShoppingCart, Droplets, Calendar, SlidersHorizontal, Bluetooth } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Dashboard = () => {
   const { user, isNewUser, setIsNewUser } = useAuth();
   const { translate } = useLanguage();
   const [showLocationPopup, setShowLocationPopup] = useState(false);
+  const [showDeviceDialog, setShowDeviceDialog] = useState(false);
   const [locationGranted, setLocationGranted] = useState(false);
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
@@ -128,13 +128,23 @@ const Dashboard = () => {
   return (
     <PageLayout>
       <div className="container mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold">
-            {translate('welcome')}
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            {translate('personalizedAssistant')}
-          </p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold">
+              {translate('welcome')}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              {translate('personalizedAssistant')}
+            </p>
+          </div>
+          
+          <Button 
+            onClick={() => setShowDeviceDialog(true)}
+            className="bg-blue-500 hover:bg-blue-600"
+          >
+            <Bluetooth className="mr-2" size={18} />
+            Connect Device
+          </Button>
         </div>
 
         {/* Sensor Data Widget */}
@@ -164,6 +174,12 @@ const Dashboard = () => {
         open={showLocationPopup} 
         onOpenChange={setShowLocationPopup}
         onLocationGranted={handleLocationGranted}
+      />
+
+      {/* Device Connection Dialog */}
+      <DeviceConnectionDialog
+        open={showDeviceDialog}
+        onOpenChange={setShowDeviceDialog}
       />
     </PageLayout>
   );

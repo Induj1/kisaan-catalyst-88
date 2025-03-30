@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Refresh } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface SensorData {
@@ -93,7 +93,7 @@ const SensorDataWidget = () => {
             disabled={isLoading}
             className="h-8"
           >
-            <Refresh size={16} className={`mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw size={16} className={`mr-1 ${isLoading ? 'animate-spin' : ''}`} />
             {isLoading ? 'Fetching...' : 'Refresh'}
           </Button>
         </CardTitle>

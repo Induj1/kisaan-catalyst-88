@@ -8,12 +8,13 @@ import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import PageLayout from '@/components/PageLayout';
 import LocationAccessPopup from '@/components/LocationAccessPopup';
+import SensorDataWidget from '@/components/SensorDataWidget';
 import { Cloud, Tractor, BarChart4, Lightbulb, ShoppingCart, Droplets, Calendar, SlidersHorizontal } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const Dashboard = () => {
   const { user, isNewUser, setIsNewUser } = useAuth();
-  const { language, translate } = useLanguage();
+  const { translate } = useLanguage();
   const [showLocationPopup, setShowLocationPopup] = useState(false);
   const [locationGranted, setLocationGranted] = useState(false);
   const [latitude, setLatitude] = useState<number | null>(null);
@@ -134,6 +135,11 @@ const Dashboard = () => {
           <p className="text-gray-600 dark:text-gray-400">
             {translate('personalizedAssistant')}
           </p>
+        </div>
+
+        {/* Sensor Data Widget */}
+        <div className="mb-8">
+          <SensorDataWidget />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

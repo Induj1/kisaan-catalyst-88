@@ -1,159 +1,458 @@
 
-import React from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { 
-  Home, 
-  Info, 
-  PenSquare, 
-  Landmark, 
-  LogIn, 
-  LogOut, 
-  UserCircle,
-  Menu,
-  X
-} from 'lucide-react';
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Menu, X, ChevronDown } from 'lucide-react';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navigation: React.FC = () => {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [isOpen, setIsOpen] = React.useState(false);
+  const { user, logout } = useAuth();
   const { translate } = useLanguage();
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
+  const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+  
+  const isActive = (path: string) => {
+    return location.pathname === path;
   };
-
-  const NavItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: string }) => {
-    const isActive = location.pathname === to;
-    
-    return (
-      <Link 
-        to={to} 
-        onClick={() => setIsOpen(false)}
-        className={cn(
-          "flex items-center gap-2 py-2 px-3 rounded-md transition-colors",
-          isActive 
-            ? "bg-primary/10 text-primary font-medium" 
-            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-        )}
-      >
-        <Icon size={18} />
-        <span>{label}</span>
-      </Link>
-    );
+  
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
   };
-
-  const navItems = [
-    { to: "/", icon: Home, label: translate('home') },
-    { to: "/features", icon: Info, label: translate('features') },
-    { to: "/demo", icon: PenSquare, label: translate('demo') },
-    { to: "/government", icon: Landmark, label: translate('government') },
-  ];
-
+  
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+  
   return (
-    <div className="sticky top-0 z-40 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-      <div className="container mx-auto px-4 flex items-center justify-between h-16">
-        <div className="flex items-center">
-          <Link to="/" className="text-xl font-bold text-primary">
-            KisaanMitra
-          </Link>
-        </div>
-
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-2">
-          {navItems.map((item) => (
-            <NavItem key={item.to} {...item} />
-          ))}
-          
-          {user ? (
-            <>
-              <NavItem to="/dashboard" icon={UserCircle} label={translate('dashboard')} />
+    <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div className="flex items-center">
+        <NavLink to="/" className="text-2xl font-bold text-primary">
+          <span className="font-bold">Kisaan</span>
+          <span className="text-primary-dark">Mitra</span>
+        </NavLink>
+      </div>
+      
+      <div className="hidden md:flex space-x-1">
+        <NavLink 
+          to="/" 
+          className={`px-3 py-2 rounded-md text-sm font-medium ${
+            isActive('/') 
+              ? 'bg-primary text-white' 
+              : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+          }`}
+        >
+          {translate('home')}
+        </NavLink>
+        
+        <NavLink 
+          to="/features" 
+          className={`px-3 py-2 rounded-md text-sm font-medium ${
+            isActive('/features') 
+              ? 'bg-primary text-white' 
+              : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+          }`}
+        >
+          {translate('features')}
+        </NavLink>
+        
+        <NavLink 
+          to="/demo" 
+          className={`px-3 py-2 rounded-md text-sm font-medium ${
+            isActive('/demo') 
+              ? 'bg-primary text-white' 
+              : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+          }`}
+        >
+          {translate('demo')}
+        </NavLink>
+        
+        <NavLink 
+          to="/government" 
+          className={`px-3 py-2 rounded-md text-sm font-medium ${
+            isActive('/government') 
+              ? 'bg-primary text-white' 
+              : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+          }`}
+        >
+          {translate('government')}
+        </NavLink>
+        
+        {user && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button 
-                variant="outline" 
-                className="ml-2" 
-                onClick={handleSignOut}
+                variant="ghost" 
+                className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 flex items-center"
               >
-                <LogOut size={18} className="mr-2" />
-                {translate('signOut')}
+                {translate('services')}
+                <ChevronDown className="ml-1 h-4 w-4" />
               </Button>
-            </>
-          ) : (
-            <Button 
-              variant="default" 
-              className="ml-2" 
-              onClick={() => navigate('/sign-in')}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem asChild>
+                <NavLink to="/dashboard" className="w-full cursor-pointer">
+                  {translate('dashboard')}
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/farm-planner" className="w-full cursor-pointer">
+                  {translate('farmPlanner')}
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/marketplace" className="w-full cursor-pointer">
+                  {translate('marketplace')}
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/weather" className="w-full cursor-pointer">
+                  {translate('weather')}
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/market-prices" className="w-full cursor-pointer">
+                  {translate('marketPrices')}
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/loans" className="w-full cursor-pointer">
+                  {translate('loans')}
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/ask-expert" className="w-full cursor-pointer">
+                  {translate('askExpert')}
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/crop-calendar" className="w-full cursor-pointer">
+                  {translate('cropCalendar')}
+                </NavLink>
+              </DropdownMenuItem>
+              
+              {/* New services */}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <NavLink to="/drone-monitoring" className="w-full cursor-pointer">
+                  Drone Monitoring
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/organic-certification" className="w-full cursor-pointer">
+                  Organic Certification
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/cold-chain-solution" className="w-full cursor-pointer">
+                  Cold Chain Solution
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/livestock-monitoring" className="w-full cursor-pointer">
+                  Livestock Monitoring
+                </NavLink>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
+      
+      <div className="hidden md:flex items-center space-x-2">
+        {user ? (
+          <div className="flex items-center space-x-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="rounded-full p-0 h-8 w-8 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center">
+                    {user.email?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <NavLink to="/settings" className="cursor-pointer">
+                    {translate('settings')}
+                  </NavLink>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
+                  {translate('logout')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ) : (
+          <>
+            <NavLink to="/sign-in">
+              <Button variant="outline" size="sm">{translate('signin')}</Button>
+            </NavLink>
+            <NavLink to="/sign-up">
+              <Button size="sm">{translate('signup')}</Button>
+            </NavLink>
+          </>
+        )}
+      </div>
+      
+      {/* Mobile menu button */}
+      <div className="md:hidden">
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={toggleMenu}
+          aria-label="Toggle menu"
+        >
+          {isOpen ? <X size={24} /> : <Menu size={24} />}
+        </Button>
+      </div>
+      
+      {/* Mobile menu */}
+      {isOpen && (
+        <div className="md:hidden absolute top-16 left-0 right-0 bg-white dark:bg-gray-900 shadow-lg z-50 p-4">
+          <div className="flex flex-col space-y-2">
+            <NavLink 
+              to="/" 
+              className={`px-3 py-2 rounded-md text-sm font-medium ${
+                isActive('/') 
+                  ? 'bg-primary text-white' 
+                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+              }`}
+              onClick={toggleMenu}
             >
-              <LogIn size={18} className="mr-2" />
-              {translate('signIn')}
-            </Button>
-          )}
-        </div>
-
-        {/* Mobile Navigation */}
-        <div className="md:hidden">
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Menu size={20} />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="sm:max-w-sm">
-              <div className="flex flex-col h-full">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-semibold">Navigation</h2>
-                  <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
-                    <X size={20} />
-                  </Button>
+              {translate('home')}
+            </NavLink>
+            
+            <NavLink 
+              to="/features" 
+              className={`px-3 py-2 rounded-md text-sm font-medium ${
+                isActive('/features') 
+                  ? 'bg-primary text-white' 
+                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+              }`}
+              onClick={toggleMenu}
+            >
+              {translate('features')}
+            </NavLink>
+            
+            <NavLink 
+              to="/demo" 
+              className={`px-3 py-2 rounded-md text-sm font-medium ${
+                isActive('/demo') 
+                  ? 'bg-primary text-white' 
+                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+              }`}
+              onClick={toggleMenu}
+            >
+              {translate('demo')}
+            </NavLink>
+            
+            <NavLink 
+              to="/government" 
+              className={`px-3 py-2 rounded-md text-sm font-medium ${
+                isActive('/government') 
+                  ? 'bg-primary text-white' 
+                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+              }`}
+              onClick={toggleMenu}
+            >
+              {translate('government')}
+            </NavLink>
+            
+            {user && (
+              <>
+                <div className="pt-2 pb-1">
+                  <p className="text-xs text-gray-500 uppercase font-semibold">Services</p>
                 </div>
                 
-                <div className="flex flex-col space-y-1">
-                  {navItems.map((item) => (
-                    <NavItem key={item.to} {...item} />
-                  ))}
-                  
-                  {user ? (
-                    <>
-                      <NavItem to="/dashboard" icon={UserCircle} label={translate('dashboard')} />
-                      <Button 
-                        variant="outline" 
-                        className="mt-4 w-full justify-start" 
-                        onClick={handleSignOut}
-                      >
-                        <LogOut size={18} className="mr-2" />
-                        {translate('signOut')}
-                      </Button>
-                    </>
-                  ) : (
-                    <Button 
-                      variant="default" 
-                      className="mt-4 w-full justify-start" 
-                      onClick={() => {
-                        navigate('/sign-in');
-                        setIsOpen(false);
-                      }}
-                    >
-                      <LogIn size={18} className="mr-2" />
-                      {translate('signIn')}
-                    </Button>
-                  )}
+                <NavLink 
+                  to="/dashboard" 
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/dashboard') 
+                      ? 'bg-primary text-white' 
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={toggleMenu}
+                >
+                  {translate('dashboard')}
+                </NavLink>
+                
+                <NavLink 
+                  to="/farm-planner" 
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/farm-planner') 
+                      ? 'bg-primary text-white' 
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={toggleMenu}
+                >
+                  {translate('farmPlanner')}
+                </NavLink>
+                
+                <NavLink 
+                  to="/marketplace" 
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/marketplace') 
+                      ? 'bg-primary text-white' 
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={toggleMenu}
+                >
+                  {translate('marketplace')}
+                </NavLink>
+                
+                <NavLink 
+                  to="/weather" 
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/weather') 
+                      ? 'bg-primary text-white' 
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={toggleMenu}
+                >
+                  {translate('weather')}
+                </NavLink>
+                
+                <NavLink 
+                  to="/market-prices" 
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/market-prices') 
+                      ? 'bg-primary text-white' 
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={toggleMenu}
+                >
+                  {translate('marketPrices')}
+                </NavLink>
+                
+                <NavLink 
+                  to="/loans" 
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/loans') 
+                      ? 'bg-primary text-white' 
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={toggleMenu}
+                >
+                  {translate('loans')}
+                </NavLink>
+                
+                <NavLink 
+                  to="/ask-expert" 
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/ask-expert') 
+                      ? 'bg-primary text-white' 
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={toggleMenu}
+                >
+                  {translate('askExpert')}
+                </NavLink>
+                
+                <NavLink 
+                  to="/crop-calendar" 
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/crop-calendar') 
+                      ? 'bg-primary text-white' 
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={toggleMenu}
+                >
+                  {translate('cropCalendar')}
+                </NavLink>
+                
+                {/* New services for mobile menu */}
+                <div className="pt-2 pb-1">
+                  <p className="text-xs text-gray-500 uppercase font-semibold">Advanced Features</p>
                 </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+                
+                <NavLink 
+                  to="/drone-monitoring" 
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/drone-monitoring') 
+                      ? 'bg-primary text-white' 
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={toggleMenu}
+                >
+                  Drone Monitoring
+                </NavLink>
+                
+                <NavLink 
+                  to="/organic-certification" 
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/organic-certification') 
+                      ? 'bg-primary text-white' 
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={toggleMenu}
+                >
+                  Organic Certification
+                </NavLink>
+                
+                <NavLink 
+                  to="/cold-chain-solution" 
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/cold-chain-solution') 
+                      ? 'bg-primary text-white' 
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={toggleMenu}
+                >
+                  Cold Chain Solution
+                </NavLink>
+                
+                <NavLink 
+                  to="/livestock-monitoring" 
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/livestock-monitoring') 
+                      ? 'bg-primary text-white' 
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={toggleMenu}
+                >
+                  Livestock Monitoring
+                </NavLink>
+              </>
+            )}
+            
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+              {user ? (
+                <Button 
+                  className="w-full" 
+                  variant="destructive"
+                  onClick={() => {
+                    handleLogout();
+                    toggleMenu();
+                  }}
+                >
+                  {translate('logout')}
+                </Button>
+              ) : (
+                <div className="flex flex-col space-y-2">
+                  <NavLink to="/sign-in" onClick={toggleMenu} className="w-full">
+                    <Button variant="outline" className="w-full">{translate('signin')}</Button>
+                  </NavLink>
+                  <NavLink to="/sign-up" onClick={toggleMenu} className="w-full">
+                    <Button className="w-full">{translate('signup')}</Button>
+                  </NavLink>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+    </nav>
   );
 };
 

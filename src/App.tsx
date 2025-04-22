@@ -23,6 +23,10 @@ import AskExpert from "./pages/AskExpert";
 import NotFound from "./pages/NotFound";
 import CropCalendar from "./pages/CropCalendar";
 import Settings from "./pages/Settings";
+import DroneMonitoring from "./pages/DroneMonitoring";
+import OrganicCertification from "./pages/OrganicCertification";
+import ColdChainSolution from "./pages/ColdChainSolution";
+import LivestockMonitoring from "./pages/LivestockMonitoring";
 
 // Import feature detail pages
 import FarmPlannerDetail from "./pages/features/FarmPlannerDetail";
@@ -137,6 +141,41 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } 
       />
+      
+      {/* New pages */}
+      <Route 
+        path="/drone-monitoring" 
+        element={
+          <ProtectedRoute>
+            <DroneMonitoring />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/organic-certification" 
+        element={
+          <ProtectedRoute>
+            <OrganicCertification />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/cold-chain-solution" 
+        element={
+          <ProtectedRoute>
+            <ColdChainSolution />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/livestock-monitoring" 
+        element={
+          <ProtectedRoute>
+            <LivestockMonitoring />
+          </ProtectedRoute>
+        } 
+      />
+      
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>

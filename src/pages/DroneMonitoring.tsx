@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  Drone, 
+  Smartphone, 
   MapPin, 
   Calendar, 
   Bolt, 
@@ -45,10 +44,8 @@ const DroneMonitoring: React.FC = () => {
   const [analysisProgress, setAnalysisProgress] = useState<number>(0);
   
   useEffect(() => {
-    // Simulate loading data
     setLoading(true);
     const timer = setTimeout(() => {
-      // Generate mock data for previous flights
       const mockPreviousFlights = [
         {
           id: 'DR-1234',
@@ -78,7 +75,6 @@ const DroneMonitoring: React.FC = () => {
       
       setPreviousFlights(mockPreviousFlights);
       
-      // Mock active flight
       setActiveFlights([
         {
           id: 'DR-1278',
@@ -96,7 +92,6 @@ const DroneMonitoring: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
   
-  // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -111,9 +106,7 @@ const DroneMonitoring: React.FC = () => {
     
     setSubmitting(true);
     
-    // Simulate API call
     setTimeout(() => {
-      // Add a new active flight
       const newFlight = {
         id: `DR-${Math.floor(1000 + Math.random() * 1000)}`,
         scheduledDate: dateTime.split('T')[0],
@@ -125,20 +118,17 @@ const DroneMonitoring: React.FC = () => {
       
       setActiveFlights([...activeFlights, newFlight]);
       
-      // Reset form
       setLocation("");
       setFarmSize("small");
       setSpecificArea("");
       setDateTime("");
       setPriority("");
       
-      // Show success message
       toast({
         title: "Drone Monitoring Scheduled",
         description: `Your drone monitoring has been scheduled for ${new Date(dateTime).toLocaleString()}`,
       });
       
-      // Switch to active flights tab
       setActiveTab("active");
       setSubmitting(false);
     }, 2000);
@@ -147,7 +137,6 @@ const DroneMonitoring: React.FC = () => {
   const startLivePreview = () => {
     setLivePreviewActive(true);
     
-    // Simulate analysis progress
     let progress = 0;
     const interval = setInterval(() => {
       progress += 5;
@@ -155,7 +144,6 @@ const DroneMonitoring: React.FC = () => {
       
       if (progress >= 100) {
         clearInterval(interval);
-        // Generate analysis data
         setLiveAnalysisData({
           cropHealth: {
             status: 'Good',
@@ -185,7 +173,6 @@ const DroneMonitoring: React.FC = () => {
           ]
         });
         
-        // Animate crop health index
         animateCropHealth();
       }
     }, 200);
@@ -299,7 +286,7 @@ const DroneMonitoring: React.FC = () => {
             </>
           ) : (
             <>
-              <Drone size={18} className="mr-2" /> Schedule Drone Monitoring
+              <Smartphone size={18} className="mr-2" /> Schedule Drone Monitoring
             </>
           )}
         </Button>
@@ -311,7 +298,7 @@ const DroneMonitoring: React.FC = () => {
     <div className="space-y-6">
       {activeFlights.length === 0 ? (
         <div className="text-center py-10">
-          <Drone size={48} className="mx-auto text-gray-300 mb-4" />
+          <Smartphone size={48} className="mx-auto text-gray-300 mb-4" />
           <h3 className="text-lg font-medium text-gray-500">No Active Flights</h3>
           <p className="text-gray-400 mt-2">You don't have any scheduled or in-progress drone monitoring.</p>
           <Button variant="link" onClick={() => setActiveTab("book")}>
@@ -324,7 +311,7 @@ const DroneMonitoring: React.FC = () => {
             <CardHeader className="bg-blue-50 pb-3">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-base flex items-center">
-                  <Drone size={18} className="mr-2 text-blue-600" />
+                  <Smartphone size={18} className="mr-2 text-blue-600" />
                   Flight #{flight.id}
                 </CardTitle>
                 <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
@@ -397,7 +384,7 @@ const DroneMonitoring: React.FC = () => {
             <CardHeader className="bg-green-50 pb-3">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-base flex items-center">
-                  <Drone size={18} className="mr-2 text-green-600" />
+                  <Smartphone size={18} className="mr-2 text-green-600" />
                   Flight #{flight.id}
                 </CardTitle>
                 <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
@@ -654,7 +641,7 @@ const DroneMonitoring: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
             <h1 className="text-3xl font-bold flex items-center">
-              <Drone className="mr-3 text-primary" />
+              <Smartphone className="mr-3 text-primary" />
               Drone-Assisted Farm Monitoring
             </h1>
             <p className="text-gray-600 mt-2">

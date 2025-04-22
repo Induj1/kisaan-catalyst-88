@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const Navigation: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth(); // Changed logout to signOut which should match the AuthContextType
   const { translate } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
@@ -29,7 +29,7 @@ const Navigation: React.FC = () => {
   
   const handleLogout = async () => {
     try {
-      await logout();
+      await signOut(); // Changed from logout to signOut
     } catch (error) {
       console.error("Error during logout:", error);
     }

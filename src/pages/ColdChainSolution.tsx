@@ -24,7 +24,8 @@ import {
   Phone,
   Sun,
   Timer,
-  AlertCircle
+  AlertCircle,
+  Smartphone // Added missing Smartphone icon import
 } from 'lucide-react';
 
 // Mock data for storage units

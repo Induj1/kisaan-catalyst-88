@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +26,6 @@ import {
   Stethoscope,
   CheckCircle,
   ClipboardList,
-  HeartPulse
 } from 'lucide-react';
 
 // Mock livestock data
@@ -123,6 +121,49 @@ const vetsData = [
   { id: 2, name: "Dr. Rajesh Verma", specialization: "Dairy Animals", phone: "+91 87654 32109", available: true },
   { id: 3, name: "Dr. Priya Patel", specialization: "Small Ruminants", phone: "+91 76543 21098", available: false }
 ];
+
+// Create a custom HeartPulse component to avoid conflict with any imported one
+const HeartPulse: React.FC<{size: number, className: string}> = ({size, className}) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+    <path d="M3.22 12H9.5l.5-1 2 4 .5-1h5.27" />
+  </svg>
+);
+
+// Also create a StepsIcon component since it's used but not imported
+const StepsIcon: React.FC<{size: number, className: string}> = ({size, className}) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M4 12v8" />
+    <path d="M4 4v4" />
+    <path d="M12 20v-4" />
+    <path d="M12 8V4" />
+    <path d="M20 20V12" />
+    <path d="M20 4v4" />
+    <path d="M2 12h4" />
+    <path d="M10 8h4" />
+    <path d="M18 12h4" />
+  </svg>
+);
 
 const LivestockMonitoring: React.FC = () => {
   const { toast } = useToast();
@@ -705,387 +746,4 @@ const LivestockMonitoring: React.FC = () => {
                   Processing...
                 </>
               ) : (
-                <>Schedule Appointment</>
-              )}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Available Veterinarians</CardTitle>
-          <CardDescription>Professionals with livestock experience</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {vetsData.map((vet) => (
-              <div key={vet.id} className="flex justify-between items-center p-3 border rounded-md">
-                <div>
-                  <p className="font-medium">{vet.name}</p>
-                  <p className="text-sm text-gray-500">{vet.specialization}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    vet.available 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {vet.available ? 'Available' : 'Unavailable'}
-                  </span>
-                  <Button variant="outline" size="sm">
-                    <Phone size={14} className="mr-1" /> Call
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-  
-  const renderRegister = () => (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Tag size={20} className="mr-2 text-primary" />
-            Register New Animal
-          </CardTitle>
-          <CardDescription>
-            Add a new animal to your livestock monitoring system
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleAddAnimal} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="animal-name">Animal Name <span className="text-red-500">*</span></Label>
-                <Input
-                  id="animal-name"
-                  placeholder="e.g., Ganga, Bahadur"
-                  value={newAnimalData.name}
-                  onChange={(e) => setNewAnimalData({...newAnimalData, name: e.target.value})}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="animal-type">Type <span className="text-red-500">*</span></Label>
-                <Select 
-                  value={newAnimalData.type} 
-                  onValueChange={(value) => setNewAnimalData({...newAnimalData, type: value})}
-                  required
-                >
-                  <SelectTrigger id="animal-type">
-                    <SelectValue placeholder="Select animal type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Cow">Cow</SelectItem>
-                    <SelectItem value="Buffalo">Buffalo</SelectItem>
-                    <SelectItem value="Goat">Goat</SelectItem>
-                    <SelectItem value="Sheep">Sheep</SelectItem>
-                    <SelectItem value="Pig">Pig</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="animal-breed">Breed <span className="text-red-500">*</span></Label>
-                <Input
-                  id="animal-breed"
-                  placeholder="e.g., Gir, Sahiwal, Black Bengal"
-                  value={newAnimalData.breed}
-                  onChange={(e) => setNewAnimalData({...newAnimalData, breed: e.target.value})}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="animal-age">Age <span className="text-red-500">*</span></Label>
-                <Input
-                  id="animal-age"
-                  placeholder="e.g., 3 years, 18 months"
-                  value={newAnimalData.age}
-                  onChange={(e) => setNewAnimalData({...newAnimalData, age: e.target.value})}
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="collar-id">Collar ID (Optional)</Label>
-              <Input
-                id="collar-id"
-                placeholder="Enter monitoring collar ID if available"
-                value={newAnimalData.collarId}
-                onChange={(e) => setNewAnimalData({...newAnimalData, collarId: e.target.value})}
-              />
-              <p className="text-xs text-gray-500">
-                You can pair a monitoring collar later if you don't have one yet
-              </p>
-            </div>
-            
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Processing...
-                </>
-              ) : (
-                <>Register Animal</>
-              )}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Monitoring Collar Setup</CardTitle>
-          <CardDescription>How to pair the health monitoring collar</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex">
-              <div className="bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                1
-              </div>
-              <div>
-                <h3 className="text-sm font-medium">Register your animal</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Fill in the details about your animal in the form above
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex">
-              <div className="bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                2
-              </div>
-              <div>
-                <h3 className="text-sm font-medium">Charge the monitoring collar</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Fully charge the collar for at least 3 hours before first use
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex">
-              <div className="bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                3
-              </div>
-              <div>
-                <h3 className="text-sm font-medium">Activate and pair the collar</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Press the button on the collar for 5 seconds until LED flashes blue
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex">
-              <div className="bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                4
-              </div>
-              <div>
-                <h3 className="text-sm font-medium">Enter the collar ID</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Find the ID on the collar label and enter it in your animal profile
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex">
-              <div className="bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                5
-              </div>
-              <div>
-                <h3 className="text-sm font-medium">Attach the collar</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Place the collar on your animal ensuring a comfortable but secure fit
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-
-  return (
-    <PageLayout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center">
-              <HeartPulse className="mr-3 text-red-600" />
-              Livestock Health Monitoring
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Real-time health tracking for your livestock with smart collar technology
-            </p>
-          </div>
-        </div>
-        
-        {loading && !getCurrentAnimal() ? (
-          <div className="h-60 flex items-center justify-center">
-            <div className="flex flex-col items-center">
-              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-              <p className="mt-4 text-gray-500">Loading animal data...</p>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="md:col-span-1 space-y-6">
-              <Card>
-                <CardHeader className="bg-red-50 pb-3">
-                  <CardTitle className="text-lg">Quick Stats</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-sm text-gray-500">Monitored Animals</p>
-                      <p className="font-medium">{livestockData.length}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Active Alerts</p>
-                      <p className="font-medium">{
-                        livestockData.filter(animal => animal.alerts.length > 0).length
-                      }</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Upcoming Vaccinations</p>
-                      <p className="font-medium">2 in next 30 days</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Last Vet Visit</p>
-                      <p className="font-medium">15 days ago</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Monitoring Benefits</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <ul className="space-y-2">
-                    <li className="flex items-start text-sm">
-                      <CheckCircle2 size={14} className="mr-2 text-green-500 mt-1 flex-shrink-0" />
-                      <span>Early disease detection reduces treatment costs</span>
-                    </li>
-                    <li className="flex items-start text-sm">
-                      <CheckCircle2 size={14} className="mr-2 text-green-500 mt-1 flex-shrink-0" />
-                      <span>24/7 monitoring helps prevent livestock losses</span>
-                    </li>
-                    <li className="flex items-start text-sm">
-                      <CheckCircle2 size={14} className="mr-2 text-green-500 mt-1 flex-shrink-0" />
-                      <span>Improve breeding success with activity tracking</span>
-                    </li>
-                    <li className="flex items-start text-sm">
-                      <CheckCircle2 size={14} className="mr-2 text-green-500 mt-1 flex-shrink-0" />
-                      <span>Direct booking with veterinarians when needed</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full justify-start"
-                      onClick={() => setActiveTab("register")}
-                    >
-                      <Plus size={14} className="mr-2" />
-                      Add New Animal
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full justify-start"
-                      onClick={() => setActiveTab("appointment")}
-                    >
-                      <Stethoscope size={14} className="mr-2" />
-                      Schedule Vet Visit
-                    </Button>
-                    <Button variant="outline" size="sm" className="w-full justify-start">
-                      <Users size={14} className="mr-2" />
-                      Find Local Vets
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <div className="md:col-span-3">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid grid-cols-3 mb-6">
-                  <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-                  <TabsTrigger value="appointment">Book Vet</TabsTrigger>
-                  <TabsTrigger value="register">Register Animal</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="dashboard" className="mt-0">
-                  {renderDashboard()}
-                </TabsContent>
-                
-                <TabsContent value="appointment" className="mt-0">
-                  {renderAppointment()}
-                </TabsContent>
-                
-                <TabsContent value="register" className="mt-0">
-                  {renderRegister()}
-                </TabsContent>
-              </Tabs>
-            </div>
-          </div>
-        )}
-      </div>
-    </PageLayout>
-  );
-};
-
-export default LivestockMonitoring;
-
-// Helper components for rendering
-const Info: React.FC<{size: number, className: string}> = ({size, className}) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <circle cx="12" cy="12" r="10"></circle>
-    <line x1="12" y1="16" x2="12" y2="12"></line>
-    <line x1="12" y1="8" x2="12.01" y2="8"></line>
-  </svg>
-);
-
-const StepsIcon: React.FC<{size: number, className: string}> = ({size, className}) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M19 5v14M5 5v14M5 5a5 5 0 0 1 5 5.5V15a5 5 0 0 0 5 5"></path>
-  </svg>
-);
-
-const CheckCircle2: React.FC<{size: number, className: string}> = ({size, className}) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <circle cx="12" cy="12" r="10"></circle>
-    <path d="m9 12 2 2 4-4"></path>
-  </svg>
-);
-
-const HeartPulse: React.FC<{size: number, className: string}> = ({size, className}) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
-    <path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"></path>
-  </svg>
-);
+                <>Schedule Appointment

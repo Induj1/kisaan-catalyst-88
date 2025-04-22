@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -26,41 +25,47 @@ import {
   TrendingUp
 } from "lucide-react";
 
+// Add import of required icons as per lucide-react-icons constraint
+import {
+  Users as UsersIcon, TrendingUp as TrendingUpIcon, Languages, Headphones, // For stats highlights
+  Calendar as CalendarIcon, BookOpen as BookOpenIcon, Search as SearchIcon, Image as ImageIcon, Home as HomeIcon, Settings as SettingsIcon, Info as InfoIcon, ArrowRight as ArrowRightIcon, Star as StarIcon, CheckCircle as CheckCircleIcon, Shield as ShieldIcon, CreditCard as CreditCardIcon, Award as AwardIcon, MessageSquare as MessageSquareIcon, MapPin, Cloud, Calculator
+} from "lucide-react";
+
 const heroImage = "https://images.unsplash.com/photo-1465379944081-7f47de8d74ac?auto=format&fit=crop&w=1400&q=80";
 
 const featureList = [
   {
-    icon: Home,
+    icon: HomeIcon,
     title: "Personalized Dashboard",
     desc: "A single page for all your farm insights: weather, sensors, tasks, prices, and updates.",
   },
   {
-    icon: Search,
+    icon: SearchIcon,
     title: "Market Intelligence",
     desc: "Get daily crop prices & trends from the nearest mandi, all in your language.",
   },
   {
-    icon: BookOpen,
+    icon: BookOpenIcon,
     title: "Ask an Expert",
     desc: "Connect with agri-experts for advice and AI-powered crop guidance, right from your dashboard.",
   },
   {
-    icon: Calendar,
+    icon: CalendarIcon,
     title: "Crop Calendar",
     desc: "Visualize, plan, and track each stage of your agricultural cycle.",
   },
   {
-    icon: Users,
+    icon: UsersIcon,
     title: "Community",
     desc: "Share experiences, troubleshoot farm issues, and stay connected with local farmers.",
   },
   {
-    icon: Settings,
+    icon: SettingsIcon,
     title: "Smart Automation",
     desc: "Integrate IoT sensors for soil, weather, and livestock data, automatically tracked.",
   },
   {
-    icon: Info,
+    icon: InfoIcon,
     title: "Govt. Schemes",
     desc: "Easily access current government schemes for agriculture and farming.",
   },
@@ -113,6 +118,75 @@ const testimonials = [
 const farmerImages = [
   "https://images.unsplash.com/photo-1493962853295-0fd70327578a?auto=format&fit=crop&w=800&q=80",
   "https://images.unsplash.com/photo-1469041797191-50ace28483c3?auto=format&fit=crop&w=800&q=80"
+];
+
+const allFeatures = [
+  {
+    icon: MapPin,
+    title: "GIS Farm Planner",
+    desc: "Precise land mapping and planning for your crops.",
+    route: "/features/farm-planner",
+  },
+  {
+    icon: CreditCard,
+    title: "Marketplace",
+    desc: "Buy seeds, fertilizers, and equipment using farm credits.",
+    route: "/features/marketplace",
+  },
+  {
+    icon: Cloud,
+    title: "Weather & Mandi Updates",
+    desc: "Get real-time weather and market price alerts.",
+    route: "/features/weather",
+  },
+  {
+    icon: MessageSquare,
+    title: "Ask an Expert",
+    desc: "AI-powered chatbot & expert network for crop advice.",
+    route: "/features/ask-expert",
+  },
+  {
+    icon: Calculator,
+    title: "Subsidy Finder",
+    desc: "Discover and apply for government schemes for your needs.",
+    route: "/features/government-schemes",
+  },
+  {
+    icon: Home,
+    title: "Personalized Dashboard",
+    desc: "Custom insights: weather, sensors, tasks, prices, and updates.",
+    route: "/dashboard",
+  },
+  {
+    icon: Search,
+    title: "Market Intelligence",
+    desc: "Get daily crop prices, trends, and mandi insights.",
+    route: "/market-prices",
+  },
+  {
+    icon: BookOpen,
+    title: "Crop Calendar",
+    desc: "Plan and track every stage of your agricultural cycle.",
+    route: "/crop-calendar",
+  },
+  {
+    icon: Users,
+    title: "Community",
+    desc: "Discuss, troubleshoot, and connect with other farmers.",
+    route: "/community",
+  },
+  {
+    icon: Settings,
+    title: "Smart Automation",
+    desc: "Automate with IoT sensors: soil, weather, livestock data.",
+    route: "/automation",
+  },
+  {
+    icon: Info,
+    title: "Govt. Schemes Info",
+    desc: "Easy access to all agri-related government schemes.",
+    route: "/features/government-schemes",
+  },
 ];
 
 const Index = () => {
@@ -253,53 +327,73 @@ const Index = () => {
             />
           ))}
         </motion.div>
-        
-        {/* Statistics callouts */}
-        <div className="absolute bottom-0 left-0 right-0 transform translate-y-1/2 px-4">
-          <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
-            <motion.div 
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 text-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              <p className="text-3xl font-bold text-primary">50,000+</p>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Farmers Served</p>
-            </motion.div>
-            <motion.div 
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 text-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-            >
-              <p className="text-3xl font-bold text-primary">15%</p>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Avg. Yield Increase</p>
-            </motion.div>
-            <motion.div 
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 text-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-            >
-              <p className="text-3xl font-bold text-primary">12</p>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Indian Languages</p>
-            </motion.div>
-            <motion.div 
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 text-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-            >
-              <p className="text-3xl font-bold text-primary">24/7</p>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Expert Support</p>
-            </motion.div>
+
+        {/* Highlighted Stats Section */}
+        <div className="w-full absolute left-0 right-0 bottom-[-96px] z-30 px-4">
+          <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl flex flex-col items-center p-6 border-4 border-primary/20">
+              <UsersIcon className="text-primary" size={32} />
+              <p className="text-3xl font-bold text-primary mt-2">50,000+</p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium mt-1 text-base">Farmers Served</p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl flex flex-col items-center p-6 border-4 border-green-400/40">
+              <TrendingUpIcon className="text-green-600" size={32} />
+              <p className="text-3xl font-bold text-green-600 mt-2">15%</p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium mt-1 text-base">Avg. Yield Increase</p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl flex flex-col items-center p-6 border-4 border-blue-400/40">
+              <Languages className="text-blue-600" size={32} />
+              <p className="text-3xl font-bold text-blue-600 mt-2">12</p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium mt-1 text-base">Indian Languages</p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl flex flex-col items-center p-6 border-4 border-yellow-500/50">
+              <Headphones className="text-yellow-500" size={32} />
+              <p className="text-3xl font-bold text-yellow-500 mt-2">24/7</p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium mt-1 text-base">Expert Support</p>
+            </div>
           </div>
         </div>
         
         {/* Fancy overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
       </section>
-      
+
+      {/* --- Adjust for space taken by floating/absolute stats --- */}
+      <div className="pt-44" /> 
+
+      {/* Features grid (replacing/adding to previous) */}
+      <section className="pb-20 px-4 bg-gradient-to-br from-[#fff7ed] via-[#d3e4fd]/40 to-[#dafdf9]/70 dark:from-gray-900 dark:to-gray-800">
+        <div className="container mx-auto max-w-7xl">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-extrabold text-primary mb-4">Platform Features</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">All-in-one platform built for India's farmers. Explore the full range below:</p>
+          </div>
+          {/* Features Grid */}
+          <div className="grid gap-7 md:grid-cols-3 sm:grid-cols-2 grid-cols-1">
+            {allFeatures.map((f, idx) => (
+              <motion.div
+                key={f.title}
+                className="rounded-xl p-7 bg-white dark:bg-gray-800 border border-primary/10 shadow-lg flex flex-col items-center hover:-translate-y-1 hover:shadow-2xl hover:bg-primary/10 dark:hover:bg-primary/20 transition-all duration-300 cursor-pointer"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ delay: idx * 0.06 + 0.1 }}
+                onClick={() => f.route && window.location.assign(f.route)}
+                tabIndex={0}
+                role="button"
+                aria-label={f.title}
+              >
+                <div className="mb-4 p-4 rounded-full bg-primary/10 w-16 h-16 flex items-center justify-center">
+                  <f.icon size={30} className="text-primary" />
+                </div>
+                <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-white text-center">{f.title}</h3>
+                <p className="text-gray-700 dark:text-gray-200 text-sm text-center flex-grow">{f.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Main features section with tabs */}
       <section className="pt-32 pb-20 px-4 bg-gradient-to-br from-[#fff7ed] via-[#d3e4fd]/40 to-[#dafdf9]/70 dark:from-gray-900 dark:to-gray-800">
         <div className="container mx-auto max-w-6xl">
@@ -561,23 +655,4 @@ const Index = () => {
             <motion.div variants={fadeInUpVariants} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
               <h3 className="font-bold text-lg mb-2">Can I connect my existing farm sensors?</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Yes, KisaanMitra supports integration with most popular farm sensor systems. The platform is designed to be compatible with a wide range of IoT devices used in agriculture.
-              </p>
-            </motion.div>
-          </motion.div>
-          
-          <div className="text-center mt-10">
-            <Button variant="outline" asChild>
-              <Link to="/contact">
-                <MessageSquare className="mr-2" size={18} />
-                Ask More Questions
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-    </PageLayout>
-  );
-};
-
-export default Index;
+                Yes, KisaanMitra supports integration with most popular farm sensor systems. The platform is designed to

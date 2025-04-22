@@ -238,7 +238,7 @@ const DroneMonitoring: React.FC = () => {
           <RadioGroup value={farmSize} onValueChange={setFarmSize} className="flex space-x-4">
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="small" id="small" />
-              <Label htmlFor="small">Small (< 2 acres)</Label>
+              <Label htmlFor="small">Small (&lt; 2 acres)</Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="medium" id="medium" />
@@ -246,7 +246,7 @@ const DroneMonitoring: React.FC = () => {
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="large" id="large" />
-              <Label htmlFor="large">Large (> 5 acres)</Label>
+              <Label htmlFor="large">Large (&gt; 5 acres)</Label>
             </div>
           </RadioGroup>
         </div>

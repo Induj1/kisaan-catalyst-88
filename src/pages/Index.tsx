@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -361,7 +362,7 @@ const Index = () => {
       {/* --- Adjust for space taken by floating/absolute stats --- */}
       <div className="pt-44" /> 
 
-      {/* Features grid (replacing/adding to previous) */}
+      {/* Features grid */}
       <section className="pb-20 px-4 bg-gradient-to-br from-[#fff7ed] via-[#d3e4fd]/40 to-[#dafdf9]/70 dark:from-gray-900 dark:to-gray-800">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-12">
@@ -655,4 +656,14 @@ const Index = () => {
             <motion.div variants={fadeInUpVariants} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
               <h3 className="font-bold text-lg mb-2">Can I connect my existing farm sensors?</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Yes, KisaanMitra supports integration with most popular farm sensor systems. The platform is designed to
+                Yes, KisaanMitra supports integration with most popular farm sensor systems. The platform is designed to work with a wide range of agricultural IoT devices.
+              </p>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+    </PageLayout>
+  );
+};
+
+export default Index;

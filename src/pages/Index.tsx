@@ -22,7 +22,8 @@ import {
   Shield,
   CreditCard,
   Award,
-  MessageSquare
+  MessageSquare,
+  TrendingUp
 } from "lucide-react";
 
 const heroImage = "https://images.unsplash.com/photo-1465379944081-7f47de8d74ac?auto=format&fit=crop&w=1400&q=80";

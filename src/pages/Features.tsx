@@ -2,7 +2,7 @@
 import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import FeatureCard from '@/components/FeatureCard';
-import { MapPin, CreditCard, Cloud, MessageSquare, Calculator } from 'lucide-react';
+import { MapPin, CreditCard, Cloud, MessageSquare, Calculator, Home, Search, BookOpen, Users, Settings, Info } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,45 +10,94 @@ const Features = () => {
   const { translate } = useLanguage();
   const navigate = useNavigate();
 
+  // Include all features, matching the extended list as on the home page
   const features = [
     {
-      title: translate('farmPlanner'),
-      description: translate('planFarmActivities'),
+      title: translate('farmPlanner') || "GIS Farm Planner",
+      description: translate('planFarmActivities') || "Precise land mapping and planning for your crops.",
       icon: MapPin,
       color: "bg-green-50",
-      buttonText: translate('learnMore'),
+      buttonText: translate('learnMore') || "Learn More",
       route: "/features/farm-planner"
     },
     {
-      title: translate('marketplace'),
-      description: translate('buyAndSellProducts'),
+      title: translate('marketplace') || "Marketplace",
+      description: translate('buyAndSellProducts') || "Buy seeds, fertilizers, and equipment using farm credits.",
       icon: CreditCard,
       color: "bg-blue-50",
-      buttonText: translate('learnMore'),
+      buttonText: translate('learnMore') || "Learn More",
       route: "/features/marketplace"
     },
     {
-      title: translate('weather'),
-      description: translate('checkForecasts'),
+      title: translate('weather') || "Weather & Mandi Updates",
+      description: translate('checkForecasts') || "Get real-time weather and market price alerts.",
       icon: Cloud,
       color: "bg-yellow-50",
-      buttonText: translate('viewUpdates'),
+      buttonText: translate('viewUpdates') || "View Updates",
       route: "/features/weather"
     },
     {
-      title: translate('askExpert'),
-      description: translate('getAIAdvice'),
+      title: translate('askExpert') || "Ask an Expert",
+      description: translate('getAIAdvice') || "AI-powered chatbot & expert network for crop advice.",
       icon: MessageSquare,
       color: "bg-purple-50",
-      buttonText: translate('askQuestions'),
+      buttonText: translate('askQuestions') || "Ask Questions",
       route: "/features/ask-expert"
     },
     {
-      title: translate('government'),
-      description: translate('findSchemes'),
+      title: translate('government') || "Subsidy Finder",
+      description: translate('findSchemes') || "Discover and apply for government schemes for your needs.",
       icon: Calculator,
       color: "bg-red-50",
-      buttonText: translate('findSchemes'),
+      buttonText: translate('findSchemes') || "Find Schemes",
+      route: "/features/government-schemes"
+    },
+    {
+      title: "Personalized Dashboard",
+      description: "Custom insights: weather, sensors, tasks, prices, and updates.",
+      icon: Home,
+      color: "bg-orange-50",
+      buttonText: "Go to Dashboard",
+      route: "/dashboard"
+    },
+    {
+      title: "Market Intelligence",
+      description: "Get daily crop prices, trends, and mandi insights.",
+      icon: Search,
+      color: "bg-cyan-50",
+      buttonText: "Market Prices",
+      route: "/market-prices"
+    },
+    {
+      title: "Crop Calendar",
+      description: "Plan and track every stage of your agricultural cycle.",
+      icon: BookOpen,
+      color: "bg-pink-50",
+      buttonText: "Crop Calendar",
+      route: "/crop-calendar"
+    },
+    {
+      title: "Community",
+      description: "Discuss, troubleshoot, and connect with other farmers.",
+      icon: Users,
+      color: "bg-teal-50",
+      buttonText: "Community",
+      route: "/community"
+    },
+    {
+      title: "Smart Automation",
+      description: "Automate with IoT sensors: soil, weather, livestock data.",
+      icon: Settings,
+      color: "bg-indigo-50",
+      buttonText: "Automation",
+      route: "/automation"
+    },
+    {
+      title: "Govt. Schemes Info",
+      description: "Easy access to all agri-related government schemes.",
+      icon: Info,
+      color: "bg-green-100",
+      buttonText: "See Schemes",
       route: "/features/government-schemes"
     },
   ];
@@ -59,10 +108,10 @@ const Features = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              KisaanMitra {translate('features')}
+              KisaanMitra {translate('features') || "Features"}
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-400">
-              {translate('personalizedAssistant')}
+              {translate('personalizedAssistant') || "Your personalized farming assistant with every tool you need."}
             </p>
           </div>
           
@@ -76,6 +125,7 @@ const Features = () => {
                 color={feature.color}
                 buttonText={feature.buttonText}
                 onClick={() => navigate(feature.route)}
+                index={index}
               />
             ))}
           </div>
@@ -86,7 +136,7 @@ const Features = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">
-              {translate('dashboard')}
+              {translate('dashboard') || "Dashboard"}
             </h2>
             
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden shadow-md">

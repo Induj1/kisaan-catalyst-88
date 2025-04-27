@@ -35,8 +35,20 @@ const DashboardWidget: React.FC<DashboardWidgetProps> = ({
   headerClassName,
   borderColor
 }) => {
+  // Create dynamic border style for left border
+  const borderStyle = borderColor 
+    ? { borderLeftColor: borderColor }
+    : {};
+  
   return (
-    <Card className={cn("h-full shadow-sm overflow-hidden", className, borderColor && `border-l-4 border-t-0 border-l-[${borderColor}]`)}>
+    <Card 
+      className={cn(
+        "h-full shadow-sm overflow-hidden", 
+        className, 
+        borderColor && "border-l-4 border-t-0"
+      )}
+      style={borderStyle}
+    >
       <CardHeader className={cn("pb-3 flex flex-row items-center justify-between", headerClassName)}>
         <div className="flex items-center gap-3">
           {Icon && (

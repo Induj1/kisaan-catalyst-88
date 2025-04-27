@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -27,17 +26,10 @@ import DroneMonitoring from "./pages/DroneMonitoring";
 import OrganicCertification from "./pages/OrganicCertification";
 import ColdChainSolution from "./pages/ColdChainSolution";
 import LivestockMonitoring from "./pages/LivestockMonitoring";
-
-// Import feature detail pages
-import FarmPlannerDetail from "./pages/features/FarmPlannerDetail";
-import MarketplaceDetail from "./pages/features/MarketplaceDetail";
-import WeatherDetail from "./pages/features/WeatherDetail";
-import AskExpertDetail from "./pages/features/AskExpertDetail";
-import GovernmentSchemesDetail from "./pages/features/GovernmentSchemesDetail";
+import CropAnalysis from '@/pages/CropAnalysis';
 
 const queryClient = new QueryClient();
 
-// Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
   
@@ -177,6 +169,8 @@ const AppRoutes = () => {
       />
       
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+      <Route path="/crop-analysis" element={<CropAnalysis />} />
+      <Route path="/crop-analysis/report" element={<CropAnalysis />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

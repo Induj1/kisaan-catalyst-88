@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -60,7 +59,6 @@ const Dashboard = () => {
   ]);
 
   useEffect(() => {
-    // Check stored location first
     const storedLat = localStorage.getItem('userLatitude');
     const storedLng = localStorage.getItem('userLongitude');
     
@@ -69,14 +67,12 @@ const Dashboard = () => {
       setLongitude(parseFloat(storedLng));
       setLocationGranted(true);
     } else if (!locationGranted && navigator.geolocation) {
-      // If no stored location, try to get it
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setLatitude(position.coords.latitude);
           setLongitude(position.coords.longitude);
           setLocationGranted(true);
           
-          // Store location in localStorage
           localStorage.setItem('userLatitude', position.coords.latitude.toString());
           localStorage.setItem('userLongitude', position.coords.longitude.toString());
         },
@@ -86,10 +82,8 @@ const Dashboard = () => {
       );
     }
     
-    // If it's a new user, show the location popup
     if (isNewUser) {
       setShowLocationPopup(true);
-      // Reset the newUser flag
       setIsNewUser(false);
     }
   }, [isNewUser, setIsNewUser, locationGranted]);
@@ -99,12 +93,10 @@ const Dashboard = () => {
     setLongitude(lng);
     setLocationGranted(true);
     
-    // Store location in localStorage
     localStorage.setItem('userLatitude', lat.toString());
     localStorage.setItem('userLongitude', lng.toString());
   };
 
-  // Feature menu items
   const featureItems = [
     {
       icon: Cloud,
@@ -162,9 +154,15 @@ const Dashboard = () => {
       route: '/settings',
       color: 'bg-gray-500',
     },
+    {
+      icon: Leaf,
+      title: translate('cropAnalysis'),
+      description: translate('analyzeYourCrops'),
+      route: '/crop-analysis',
+      color: 'bg-lime-500',
+    },
   ];
 
-  // Render alert severity icon
   const renderAlertIcon = (severity: string) => {
     switch(severity) {
       case 'high':
@@ -178,7 +176,6 @@ const Dashboard = () => {
     }
   };
 
-  // Task status style
   const getTaskStatusStyle = (status: string) => {
     switch(status) {
       case 'completed':
@@ -232,7 +229,6 @@ const Dashboard = () => {
           </TabsList>
           
           <TabsContent value="overview" className="space-y-6">
-            {/* Top Cards Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="shadow-sm border-l-4 border-l-blue-500">
                 <CardContent className="p-6">
@@ -295,9 +291,7 @@ const Dashboard = () => {
               </Card>
             </div>
             
-            {/* Middle Section */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Alerts Card */}
               <Card className="md:col-span-1">
                 <CardHeader className="pb-3">
                   <CardTitle>Recent Alerts</CardTitle>
@@ -318,7 +312,6 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
               
-              {/* Tasks Card */}
               <Card className="md:col-span-1">
                 <CardHeader className="pb-3">
                   <CardTitle>Upcoming Tasks</CardTitle>
@@ -344,7 +337,6 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
               
-              {/* Market Prices Card */}
               <Card className="md:col-span-1">
                 <CardHeader className="pb-3">
                   <CardTitle>Market Prices</CardTitle>
@@ -375,7 +367,6 @@ const Dashboard = () => {
               </Card>
             </div>
             
-            {/* Sensor Data Chart */}
             <div className="mb-6">
               <Card>
                 <CardHeader className="pb-3">
@@ -424,7 +415,6 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* Example connected device */}
                   <Card className="border border-green-200 dark:border-green-900">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start">
@@ -444,7 +434,6 @@ const Dashboard = () => {
                     </CardContent>
                   </Card>
                   
-                  {/* Example connected device */}
                   <Card className="border border-amber-200 dark:border-amber-900">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start">
@@ -464,7 +453,6 @@ const Dashboard = () => {
                     </CardContent>
                   </Card>
                   
-                  {/* Example connected device */}
                   <Card className="border border-gray-200 dark:border-gray-700">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start">
@@ -507,14 +495,12 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Location Access Popup */}
       <LocationAccessPopup 
         open={showLocationPopup} 
         onOpenChange={setShowLocationPopup}
         onLocationGranted={handleLocationGranted}
       />
 
-      {/* Device Connection Dialog */}
       <DeviceConnectionDialog
         open={showDeviceDialog}
         onOpenChange={setShowDeviceDialog}

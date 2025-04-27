@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown, Leaf } from 'lucide-react';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -162,6 +161,11 @@ const Navigation: React.FC = () => {
               <DropdownMenuItem asChild>
                 <NavLink to="/livestock-monitoring" className="w-full cursor-pointer">
                   Livestock Monitoring
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/crop-analysis" className="w-full cursor-pointer">
+                  {translate('cropAnalysis')}
                 </NavLink>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -422,6 +426,17 @@ const Navigation: React.FC = () => {
                   onClick={toggleMenu}
                 >
                   Livestock Monitoring
+                </NavLink>
+                <NavLink 
+                  to="/crop-analysis" 
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/crop-analysis') 
+                      ? 'bg-primary text-white' 
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={toggleMenu}
+                >
+                  {translate('cropAnalysis')}
                 </NavLink>
               </>
             )}

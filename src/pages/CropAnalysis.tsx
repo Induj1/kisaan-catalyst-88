@@ -1,13 +1,15 @@
 
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
 import CropAnalysisForm from "@/components/CropAnalysisForm";
 import CropAnalysisReport from "@/components/CropAnalysisReport";
 
 const CropAnalysis: React.FC = () => {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const isReportPage = location.pathname.includes("/report");
+  const reportId = searchParams.get('id');
 
   return (
     <PageLayout>

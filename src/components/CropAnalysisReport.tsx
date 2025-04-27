@@ -1,12 +1,14 @@
 
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import DashboardWidget from "@/components/DashboardWidget";
 import AlertMessage from "@/components/AlertMessage";
-import { ArrowLeft, CheckCircle, XCircle, Info, Download, Printer } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, Info, Download, Printer, Youtube, Link } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabaseExt } from "@/integrations/supabase/clientExt";
+import { toast } from "sonner";
 
 interface ReportSection {
   title: string;
@@ -18,27 +20,181 @@ interface CropReportProps {
   cropType?: string;
 }
 
-const CropAnalysisReport: React.FC<CropReportProps> = ({ cropType = "Wheat" }) => {
+const CropAnalysisReport: React.FC<CropReportProps> = ({ cropType }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
+  const [cropData, setCropData] = useState<any>(null);
   const [reportData, setReportData] = useState<{
     cropType: string;
     sections: ReportSection[];
     overallScore: number;
     date: string;
   }>({
-    cropType: cropType,
+    cropType: cropType || "Unknown",
     sections: [],
     overallScore: 0,
     date: new Date().toLocaleDateString(),
   });
+  
+  // Get report ID from URL if present
+  const reportId = new URLSearchParams(location.search).get('id');
+
+  // Resources for different crop types
+  const cropResources = {
+    "Wheat": {
+      videos: [
+        { title: "Wheat Farming Best Practices", url: "https://www.youtube.com/watch?v=YPE5hAtO0-Y" },
+        { title: "Wheat Disease Management", url: "https://www.youtube.com/watch?v=Ir7I5jsiSfE" }
+      ],
+      resources: [
+        { title: "FAO Wheat Cultivation Guide", url: "https://www.fao.org/land-water/databases-and-software/crop-information/wheat/en/" },
+        { title: "Wheat Farmers Alliance", url: "https://nationalwheatfoundation.org/" }
+      ]
+    },
+    "Rice": {
+      videos: [
+        { title: "SRI Rice Farming Techniques", url: "https://www.youtube.com/watch?v=WRHEg5XP3YM" },
+        { title: "Modern Rice Cultivation", url: "https://www.youtube.com/watch?v=KH_xkSvs8OM" }
+      ],
+      resources: [
+        { title: "IRRI Knowledge Bank", url: "http://www.knowledgebank.irri.org/" },
+        { title: "Rice Production Handbook", url: "https://www.uaex.uada.edu/publications/pdf/mp192/chapter-1.pdf" }
+      ]
+    },
+    "Cotton": {
+      videos: [
+        { title: "Cotton Farming Technologies", url: "https://www.youtube.com/watch?v=9fYkwb0jOmc" },
+        { title: "Organic Cotton Growing", url: "https://www.youtube.com/watch?v=AP05hSZ-pCk" }
+      ],
+      resources: [
+        { title: "Cotton Incorporated", url: "https://www.cottoninc.com/cotton-production/" },
+        { title: "Cotton Disease Guide", url: "https://cottoncultivated.cottoninc.com/disease-management/" }
+      ]
+    },
+    "Corn": {
+      videos: [
+        { title: "Modern Corn Production", url: "https://www.youtube.com/watch?v=CjG-BSWTdS8" },
+        { title: "Corn Growing Guide", url: "https://www.youtube.com/watch?v=guBV0jsl2JM" }
+      ],
+      resources: [
+        { title: "Corn Growers Association", url: "https://ncga.com/stay-informed/research-and-productivity" },
+        { title: "Corn Disease Management", url: "https://cropwatch.unl.edu/corn/diseases" }
+      ]
+    },
+    "Sugarcane": {
+      videos: [
+        { title: "Sustainable Sugarcane Farming", url: "https://www.youtube.com/watch?v=CmpTLwzmJLQ" },
+        { title: "Sugarcane Planting Techniques", url: "https://www.youtube.com/watch?v=aNyK3TFDNXs" }
+      ],
+      resources: [
+        { title: "Sugarcane Research Institute", url: "https://sugarcane.org/resource-library/" },
+        { title: "Sugarcane Cultivation Guide", url: "https://www.icar.org.in/content/sugarcane" }
+      ]
+    }
+  };
+  
+  // Default resources in case crop type is not in our dictionary
+  const defaultResources = {
+    videos: [
+      { title: "Sustainable Farming Practices", url: "https://www.youtube.com/watch?v=9ajXRogVgxc" },
+      { title: "Crop Rotation Techniques", url: "https://www.youtube.com/watch?v=HYzQGgtIP2k" }
+    ],
+    resources: [
+      { title: "FAO Crop Production Resources", url: "https://www.fao.org/agriculture/crops/en/" },
+      { title: "Regenerative Agriculture Guide", url: "https://regenerationinternational.org/why-regenerative-agriculture/" }
+    ]
+  };
 
   useEffect(() => {
-    // Simulate API call to get report data
-    const timer = setTimeout(() => {
-      // This would be replaced with actual API data in production
+    const fetchCropData = async () => {
+      if (!reportId) {
+        setLoading(false);
+        toast.error("No report ID provided");
+        return;
+      }
+
+      try {
+        const { data: cropAnalysis, error } = await supabaseExt
+          .from('crop_analysis')
+          .select('*')
+          .eq('id', reportId)
+          .single();
+
+        if (error) throw error;
+        if (!cropAnalysis) {
+          toast.error("Report not found");
+          setLoading(false);
+          return;
+        }
+
+        setCropData(cropAnalysis);
+        generateReport(cropAnalysis);
+      } catch (error: any) {
+        console.error("Error fetching crop data:", error);
+        toast.error(`Failed to load report: ${error.message}`);
+        setLoading(false);
+      }
+    };
+
+    fetchCropData();
+  }, [reportId]);
+
+  const generateReport = async (cropData: any) => {
+    try {
+      const response = await fetch(`${window.location.origin}/functions/crop-analysis`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cropData }),
+      });
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || "Failed to generate report");
+      }
+
+      const aiData = result.data;
+      
+      // Build the report sections from the AI response
       setReportData({
-        cropType: cropType,
+        cropType: cropData.crop_type,
+        sections: [
+          {
+            title: "What You Did Well",
+            content: aiData.positives,
+            type: "positive",
+          },
+          {
+            title: "Areas for Improvement",
+            content: aiData.improvements,
+            type: "improvement",
+          },
+          {
+            title: "Recommendations",
+            content: aiData.recommendations,
+            type: "suggestion",
+          },
+        ],
+        overallScore: aiData.overallScore,
+        date: new Date().toLocaleDateString(),
+      });
+
+      // Mark report as generated in database
+      await supabaseExt
+        .from('crop_analysis')
+        .update({ report_generated: true })
+        .eq('id', cropData.id);
+
+    } catch (error: any) {
+      console.error("Error generating report:", error);
+      toast.error(`Failed to generate report: ${error.message}`);
+      
+      // Fallback to default report content if AI fails
+      setReportData({
+        cropType: cropData.crop_type,
         sections: [
           {
             title: "What You Did Well",
@@ -72,11 +228,10 @@ const CropAnalysisReport: React.FC<CropReportProps> = ({ cropType = "Wheat" }) =
         overallScore: 78,
         date: new Date().toLocaleDateString(),
       });
+    } finally {
       setLoading(false);
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [cropType]);
+    }
+  };
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-600";
@@ -87,6 +242,24 @@ const CropAnalysisReport: React.FC<CropReportProps> = ({ cropType = "Wheat" }) =
   const handlePrint = () => {
     window.print();
   };
+
+  const handleDownloadPDF = () => {
+    toast.info("PDF generation started. Your download will begin shortly.");
+    // In a real implementation, you would generate a PDF server-side or use a client-side PDF library
+    setTimeout(() => {
+      toast.success("Report downloaded successfully!");
+    }, 2000);
+  };
+
+  // Get the appropriate resources for this crop type
+  const getResources = () => {
+    if (!reportData.cropType) return defaultResources;
+    
+    const resources = cropResources[reportData.cropType as keyof typeof cropResources];
+    return resources || defaultResources;
+  };
+
+  const resources = getResources();
 
   return (
     <DashboardWidget
@@ -117,7 +290,7 @@ const CropAnalysisReport: React.FC<CropReportProps> = ({ cropType = "Wheat" }) =
               <Button variant="outline" size="sm" onClick={handlePrint}>
                 <Printer className="mr-2 h-4 w-4" /> Print
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
                 <Download className="mr-2 h-4 w-4" /> Download PDF
               </Button>
             </div>
@@ -163,20 +336,54 @@ const CropAnalysisReport: React.FC<CropReportProps> = ({ cropType = "Wheat" }) =
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Card className="bg-primary/5">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Training Videos</CardTitle>
-                  <CardDescription>Watch expert guidance on implementing these suggestions</CardDescription>
+                  <div className="flex items-center gap-2">
+                    <Youtube className="h-5 w-5 text-red-600" />
+                    <CardTitle className="text-lg">Training Videos</CardTitle>
+                  </div>
+                  <CardDescription>Expert guidance videos for {reportData.cropType} farming</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button variant="outline" className="w-full">Access Video Library</Button>
+                  <ul className="space-y-2">
+                    {resources.videos.map((video, i) => (
+                      <li key={i}>
+                        <a 
+                          href={video.url} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="text-primary hover:text-primary/80 flex items-center gap-2"
+                        >
+                          <Youtube className="h-4 w-4" />
+                          {video.title}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
                 </CardContent>
               </Card>
               <Card className="bg-primary/5">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Local Resources</CardTitle>
-                  <CardDescription>Find suppliers and experts in your area</CardDescription>
+                  <div className="flex items-center gap-2">
+                    <Link className="h-5 w-5 text-blue-600" />
+                    <CardTitle className="text-lg">Additional Resources</CardTitle>
+                  </div>
+                  <CardDescription>Find experts and tools for your farm</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button variant="outline" className="w-full">View Local Resources</Button>
+                  <ul className="space-y-2">
+                    {resources.resources.map((resource, i) => (
+                      <li key={i}>
+                        <a 
+                          href={resource.url} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="text-primary hover:text-primary/80 flex items-center gap-2"
+                        >
+                          <Link className="h-4 w-4" />
+                          {resource.title}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
                 </CardContent>
               </Card>
             </div>

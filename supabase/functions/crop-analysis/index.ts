@@ -21,41 +21,47 @@ serve(async (req) => {
       throw new Error('OPENAI_API_KEY is not set');
     }
 
-    // Construct a comprehensive prompt based on the crop data
+    // Construct a more comprehensive and nuanced prompt
     const prompt = `
-      As an agricultural expert AI, analyze the following crop data and provide three sections of feedback:
-      1. What They Did Well (3 points)
-      2. Areas for Improvement (3 points)
-      3. Recommendations (4 specific suggestions)
-      
-      Also provide an overall health score from 0-100.
+      As an expert agricultural consultant, provide a detailed, actionable analysis of this crop cultivation data:
 
-      Crop Information:
-      - Crop Type: ${cropData.crop_type}
+      Crop Specifics:
+      - Type: ${cropData.crop_type}
       - Land Size: ${cropData.land_size}
       - Sowing Date: ${cropData.sowing_date}
       - Cultivation Method: ${cropData.cultivation_method}
       - Watering Method: ${cropData.watering_method}
-      - Seed Type: ${cropData.seed_type}
-      - Seed Source: ${cropData.seed_source}
-      - Fertilizers Used: ${cropData.fertilizers || 'None specified'}
-      - Pesticides Used: ${cropData.pesticides || 'None specified'}
-      - Problems Reported: ${cropData.problems}
-      - Harvest Outcome: ${cropData.harvest_outcome}
-      - Additional Notes: ${cropData.additional_notes || 'None'}
 
-      Provide the response in the following JSON format:
+      Key Observations and Analysis:
+      1. Provide 3-4 specific strengths in the current cultivation approach
+      2. Identify 3-4 critical areas for improvement
+      3. Offer targeted, practical recommendations for enhancing crop yield and sustainability
+      4. Assess overall agricultural practices with a comprehensive score (0-100)
+
+      Response Format (STRICT JSON):
       {
-        "positives": ["point1", "point2", "point3"],
-        "improvements": ["point1", "point2", "point3"],
-        "recommendations": ["rec1", "rec2", "rec3", "rec4"],
+        "positives": [
+          "Specific positive observation 1",
+          "Specific positive observation 2",
+          "Specific positive observation 3"
+        ],
+        "improvements": [
+          "Critical area of improvement 1",
+          "Critical area of improvement 2", 
+          "Critical area of improvement 3"
+        ],
+        "recommendations": [
+          "Practical recommendation 1",
+          "Practical recommendation 2", 
+          "Practical recommendation 3",
+          "Practical recommendation 4"
+        ],
         "overallScore": number
       }
-      
-      Be realistic, practical, and provide actionable advice. The content should be specific to this crop data.
+
+      Note: Provide realistic, data-driven insights based on the specific crop type and cultivation details.
     `;
 
-    // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -65,10 +71,14 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are an agricultural expert AI that provides crop analysis and recommendations.' },
+          { 
+            role: 'system', 
+            content: 'You are an expert agricultural consultant providing detailed, actionable crop analysis.' 
+          },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
+        response_format: { type: 'json_object' }
       }),
     });
 
@@ -78,20 +88,9 @@ serve(async (req) => {
       throw new Error(`OpenAI API error: ${data.error?.message || 'Unknown error'}`);
     }
 
+    // Parse the AI-generated analysis
     const analysisText = data.choices[0].message.content;
-    let analysisJson;
-    
-    try {
-      // Extract JSON from the response (in case there's additional text)
-      const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        analysisJson = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error('Could not extract JSON from response');
-      }
-    } catch (error) {
-      throw new Error(`Failed to parse AI response: ${error.message}`);
-    }
+    const analysisJson = JSON.parse(analysisText);
 
     return new Response(JSON.stringify({
       success: true,
@@ -101,7 +100,7 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in crop analysis:', error);
     return new Response(JSON.stringify({
       success: false,
       error: error.message

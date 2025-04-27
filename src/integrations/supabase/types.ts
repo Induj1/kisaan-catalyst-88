@@ -9,6 +9,63 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      crop_analysis: {
+        Row: {
+          additional_notes: string | null
+          created_at: string
+          crop_type: string
+          cultivation_method: string
+          fertilizers: string | null
+          harvest_outcome: string
+          id: string
+          land_size: string
+          pesticides: string | null
+          problems: string
+          report_generated: boolean | null
+          seed_source: string
+          seed_type: string
+          sowing_date: string
+          user_id: string | null
+          watering_method: string
+        }
+        Insert: {
+          additional_notes?: string | null
+          created_at?: string
+          crop_type: string
+          cultivation_method: string
+          fertilizers?: string | null
+          harvest_outcome: string
+          id?: string
+          land_size: string
+          pesticides?: string | null
+          problems: string
+          report_generated?: boolean | null
+          seed_source: string
+          seed_type: string
+          sowing_date: string
+          user_id?: string | null
+          watering_method: string
+        }
+        Update: {
+          additional_notes?: string | null
+          created_at?: string
+          crop_type?: string
+          cultivation_method?: string
+          fertilizers?: string | null
+          harvest_outcome?: string
+          id?: string
+          land_size?: string
+          pesticides?: string | null
+          problems?: string
+          report_generated?: boolean | null
+          seed_source?: string
+          seed_type?: string
+          sowing_date?: string
+          user_id?: string | null
+          watering_method?: string
+        }
+        Relationships: []
+      }
       farmer_profiles: {
         Row: {
           address: string

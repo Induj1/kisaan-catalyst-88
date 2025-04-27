@@ -75,20 +75,23 @@ const CropAnalysisForm: React.FC = () => {
   const onSubmit = async (data: FormValues) => {
     try {
       // Store the form data in Supabase
-      const { error } = await supabaseExt.from("crop_analysis").insert([{
-        crop_type: data.cropType,
-        land_size: `${data.landSize} ${data.landUnit}`,
-        sowing_date: data.sowingDate.toISOString(),
-        cultivation_method: data.cultivationMethod,
-        watering_method: data.wateringMethod,
-        seed_type: data.seedType,
-        seed_source: data.seedSource,
-        fertilizers: data.fertilizers,
-        pesticides: data.pesticides,
-        problems: data.problems,
-        harvest_outcome: data.harvestOutcome,
-        additional_notes: data.additionalNotes,
-      }]);
+      const { error } = await supabaseExt
+        .from('crop_analysis')
+        .insert([{
+          crop_type: data.cropType,
+          land_size: `${data.landSize} ${data.landUnit}`,
+          sowing_date: data.sowingDate.toISOString(),
+          cultivation_method: data.cultivationMethod,
+          watering_method: data.wateringMethod,
+          seed_type: data.seedType,
+          seed_source: data.seedSource,
+          fertilizers: data.fertilizers || null,
+          pesticides: data.pesticides || null,
+          problems: data.problems,
+          harvest_outcome: data.harvestOutcome,
+          additional_notes: data.additionalNotes || null,
+          user_id: (await supabaseExt.auth.getUser()).data.user?.id
+        }]);
 
       if (error) throw error;
 

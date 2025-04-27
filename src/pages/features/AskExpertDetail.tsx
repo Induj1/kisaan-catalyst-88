@@ -1,31 +1,24 @@
 
 import React from 'react';
+import PageLayout from '@/components/PageLayout';
 import FeatureDetail from '@/components/FeatureDetail';
 import { MessageSquare } from 'lucide-react';
 
 const AskExpertDetail = () => {
   return (
-    <FeatureDetail
-      title="AI Advisor"
-      description="AI-powered chatbot for precise crop advice"
-      icon={MessageSquare}
-      color="bg-purple-50"
-      iconColor="bg-purple-500"
-      benefits={[
-        "24/7 access to agricultural expertise without internet connection",
-        "Personalized recommendations based on your specific farm conditions",
-        "Rapid diagnosis of crop diseases and pest issues",
-        "Step-by-step guidance for implementing modern farming techniques"
-      ]}
-      features={[
-        "Voice-enabled interaction in multiple regional languages",
-        "Visual recognition of plant diseases using your camera",
-        "Offline capability for use in remote areas",
-        "Knowledge base built on agricultural research and local farming practices",
-        "Connection to live experts for complex issues"
-      ]}
-      demoLink="/ask-expert"
-    />
+    <PageLayout>
+      <FeatureDetail
+        title="Ask an Expert"
+        description="AI-powered chatbot & expert network for crop advice"
+        icon={MessageSquare}
+        features={[
+          "24/7 AI assistance",
+          "Connect with agricultural experts",
+          "Community knowledge sharing",
+          "Personalized recommendations"
+        ]}
+      />
+    </PageLayout>
   );
 };
 

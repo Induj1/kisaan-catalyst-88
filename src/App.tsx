@@ -27,6 +27,11 @@ import OrganicCertification from "./pages/OrganicCertification";
 import ColdChainSolution from "./pages/ColdChainSolution";
 import LivestockMonitoring from "./pages/LivestockMonitoring";
 import CropAnalysis from '@/pages/CropAnalysis';
+import FarmPlannerDetail from "./pages/features/FarmPlannerDetail";
+import MarketplaceDetail from "./pages/features/MarketplaceDetail";
+import WeatherDetail from "./pages/features/WeatherDetail";
+import AskExpertDetail from "./pages/features/AskExpertDetail";
+import GovernmentSchemesDetail from "./pages/features/GovernmentSchemesDetail";
 
 const queryClient = new QueryClient();
 

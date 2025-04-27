@@ -1,11 +1,10 @@
-
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { supabaseExt } from "@/integrations/supabase/clientExt";
+import { supabase } from "@/integrations/supabase/client";
 
 import {
   Form,
@@ -74,10 +73,9 @@ const CropAnalysisForm: React.FC = () => {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      // Store the form data in Supabase
-      const { error } = await supabaseExt
+      const { error } = await supabase
         .from('crop_analysis')
-        .insert([{
+        .insert({
           crop_type: data.cropType,
           land_size: `${data.landSize} ${data.landUnit}`,
           sowing_date: data.sowingDate.toISOString(),
@@ -90,8 +88,8 @@ const CropAnalysisForm: React.FC = () => {
           problems: data.problems,
           harvest_outcome: data.harvestOutcome,
           additional_notes: data.additionalNotes || null,
-          user_id: (await supabaseExt.auth.getUser()).data.user?.id
-        }]);
+          user_id: (await supabase.auth.getUser()).data.user?.id
+        });
 
       if (error) throw error;
 
@@ -100,7 +98,6 @@ const CropAnalysisForm: React.FC = () => {
         description: "Your crop data has been successfully submitted for analysis.",
       });
 
-      // Redirect to the report page
       navigate("/crop-analysis/report");
     } catch (error) {
       console.error("Error submitting crop analysis:", error);
@@ -129,7 +126,6 @@ const CropAnalysisForm: React.FC = () => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Crop Type Field */}
             <FormField
               control={form.control}
               name="cropType"
@@ -144,7 +140,6 @@ const CropAnalysisForm: React.FC = () => {
               )}
             />
 
-            {/* Land Size Field */}
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -186,7 +181,6 @@ const CropAnalysisForm: React.FC = () => {
             </div>
           </div>
 
-          {/* Sowing Date Field */}
           <FormField
             control={form.control}
             name="sowingDate"
@@ -228,7 +222,6 @@ const CropAnalysisForm: React.FC = () => {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Cultivation Method Field */}
             <FormField
               control={form.control}
               name="cultivationMethod"
@@ -278,7 +271,6 @@ const CropAnalysisForm: React.FC = () => {
               )}
             />
 
-            {/* Watering Method Field */}
             <FormField
               control={form.control}
               name="wateringMethod"
@@ -330,7 +322,6 @@ const CropAnalysisForm: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Seed Type Field */}
             <FormField
               control={form.control}
               name="seedType"
@@ -345,7 +336,6 @@ const CropAnalysisForm: React.FC = () => {
               )}
             />
 
-            {/* Seed Source Field */}
             <FormField
               control={form.control}
               name="seedSource"
@@ -361,7 +351,6 @@ const CropAnalysisForm: React.FC = () => {
             />
           </div>
 
-          {/* Fertilizers Field */}
           <FormField
             control={form.control}
             name="fertilizers"
@@ -380,7 +369,6 @@ const CropAnalysisForm: React.FC = () => {
             )}
           />
 
-          {/* Pesticides Field */}
           <FormField
             control={form.control}
             name="pesticides"
@@ -399,7 +387,6 @@ const CropAnalysisForm: React.FC = () => {
             )}
           />
 
-          {/* Problems Faced Field */}
           <FormField
             control={form.control}
             name="problems"
@@ -418,7 +405,6 @@ const CropAnalysisForm: React.FC = () => {
             )}
           />
 
-          {/* Harvest Outcome Field */}
           <FormField
             control={form.control}
             name="harvestOutcome"
@@ -456,7 +442,6 @@ const CropAnalysisForm: React.FC = () => {
             )}
           />
 
-          {/* Additional Notes Field */}
           <FormField
             control={form.control}
             name="additionalNotes"

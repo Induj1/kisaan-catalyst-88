@@ -11,6 +11,14 @@ const MarketplaceDetail = () => {
         title="Marketplace"
         description="Buy seeds, fertilizers, and equipment using farm credits"
         icon={CreditCard}
+        color="bg-amber-100"
+        iconColor="text-amber-500"
+        benefits={[
+          "Access quality agricultural inputs",
+          "Save money with farm credits",
+          "Connect directly with sellers",
+          "Build trusted trading network"
+        ]}
         features={[
           "Direct farmer-to-farmer trading",
           "Quality-verified products",

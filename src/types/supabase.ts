@@ -8,6 +8,7 @@ export interface Database extends OriginalDatabase {
     Tables: {
       farmer_profiles: OriginalDatabase['public']['Tables']['farmer_profiles'];
       loan_applications: OriginalDatabase['public']['Tables']['loan_applications'];
+      crop_analysis: OriginalDatabase['public']['Tables']['crop_analysis'];
       marketplace_listings: {
         Row: {
           id: string;

@@ -11,6 +11,14 @@ const GovernmentSchemesDetail = () => {
         title="Subsidy Finder"
         description="Discover and apply for government schemes for your needs"
         icon={Calculator}
+        color="bg-red-100"
+        iconColor="text-red-500"
+        benefits={[
+          "Find all applicable subsidies",
+          "Simplify application process",
+          "Track application status",
+          "Get reminders for deadlines"
+        ]}
         features={[
           "Eligibility checker",
           "Application assistance",

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ interface CropAnalysisReportProps {
 const CropAnalysisReport: React.FC<CropAnalysisReportProps> = ({ reportId }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [cropData, setCropData] = useState<any>(null);
   const [reportData, setReportData] = useState<{
     cropType: string;
@@ -105,6 +107,7 @@ const CropAnalysisReport: React.FC<CropAnalysisReportProps> = ({ reportId }) => 
     const fetchCropData = async () => {
       if (!reportId) {
         setLoading(false);
+        setError("No report ID provided");
         toast.error("No report ID provided");
         return;
       }
@@ -119,14 +122,16 @@ const CropAnalysisReport: React.FC<CropAnalysisReportProps> = ({ reportId }) => 
         if (error) throw error;
         if (!cropAnalysis) {
           toast.error("Report not found");
+          setError("Report not found");
           setLoading(false);
           return;
         }
 
         setCropData(cropAnalysis);
-        generateReport(cropAnalysis);
+        await generateReport(cropAnalysis);
       } catch (error: any) {
         console.error("Error fetching crop data:", error);
+        setError(`Failed to load report: ${error.message}`);
         toast.error(`Failed to load report: ${error.message}`);
         setLoading(false);
       }
@@ -137,7 +142,9 @@ const CropAnalysisReport: React.FC<CropAnalysisReportProps> = ({ reportId }) => 
 
   const generateReport = async (cropData: any) => {
     try {
-      const response = await fetch(`${window.location.origin}/functions/crop-analysis`, {
+      console.log("Generating report for crop data:", cropData);
+      
+      const response = await fetch(`/functions/crop-analysis`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,13 +152,26 @@ const CropAnalysisReport: React.FC<CropAnalysisReportProps> = ({ reportId }) => 
         body: JSON.stringify({ cropData }),
       });
 
-      const result = await response.json();
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error response from crop-analysis function:", errorText);
+        throw new Error(`API error: ${response.status} ${response.statusText}`);
+      }
+      
+      let result;
+      try {
+        result = await response.json();
+      } catch (error) {
+        console.error("Failed to parse JSON response:", error);
+        throw new Error("Failed to parse response from server");
+      }
       
       if (!result.success) {
         throw new Error(result.error || "Failed to generate report");
       }
 
       const aiData = result.data;
+      console.log("AI generated data:", aiData);
       
       // Build the report sections from the AI response
       setReportData({
@@ -185,6 +205,7 @@ const CropAnalysisReport: React.FC<CropAnalysisReportProps> = ({ reportId }) => 
 
     } catch (error: any) {
       console.error("Error generating report:", error);
+      setError(`Failed to generate report: ${error.message}`);
       toast.error(`Failed to generate report: ${error.message}`);
       
       // Fallback to default report content if AI fails
@@ -255,6 +276,33 @@ const CropAnalysisReport: React.FC<CropAnalysisReportProps> = ({ reportId }) => 
   };
 
   const resources = getResources();
+
+  if (error && !loading) {
+    return (
+      <DashboardWidget
+        title="Error Loading Analysis"
+        description="We encountered a problem loading your crop analysis"
+        icon={Info}
+        iconColor="text-red-600"
+        iconBgColor="bg-red-100"
+        actionLabel="Back to Form"
+        onActionClick={() => navigate("/crop-analysis")}
+        className="print:shadow-none print:border-none"
+      >
+        <AlertMessage
+          title="Error Loading Report"
+          message={error}
+          type="error"
+          className="mb-6"
+        />
+        <div className="mt-8 text-center">
+          <Button onClick={() => navigate("/crop-analysis")} className="w-full max-w-sm">
+            <ArrowLeft size={16} className="mr-2" /> Return to Analysis Form
+          </Button>
+        </div>
+      </DashboardWidget>
+    );
+  }
 
   return (
     <DashboardWidget

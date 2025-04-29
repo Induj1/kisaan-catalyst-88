@@ -1,3 +1,4 @@
+
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -27,6 +28,7 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   cropType: z.string().min(2, { message: "Please enter a valid crop type" }),
@@ -73,7 +75,7 @@ const CropAnalysisForm: React.FC = () => {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      const { error } = await supabase
+      const { data: insertedData, error } = await supabase
         .from('crop_analysis')
         .insert({
           crop_type: data.cropType,
@@ -89,16 +91,22 @@ const CropAnalysisForm: React.FC = () => {
           harvest_outcome: data.harvestOutcome,
           additional_notes: data.additionalNotes || null,
           user_id: (await supabase.auth.getUser()).data.user?.id
-        });
+        })
+        .select('id')
+        .single();
 
       if (error) throw error;
+      
+      if (!insertedData?.id) {
+        throw new Error("Failed to get the report ID");
+      }
 
       toast({
         title: "Analysis Request Submitted",
         description: "Your crop data has been successfully submitted for analysis.",
       });
 
-      navigate("/crop-analysis/report");
+      navigate(`/crop-analysis/report?id=${insertedData.id}`);
     } catch (error) {
       console.error("Error submitting crop analysis:", error);
       toast({

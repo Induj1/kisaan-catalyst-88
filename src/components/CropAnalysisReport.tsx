@@ -1,13 +1,12 @@
-
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import DashboardWidget from "@/components/DashboardWidget";
 import AlertMessage from "@/components/AlertMessage";
 import { ArrowLeft, CheckCircle, XCircle, Info, Download, Printer, Youtube, Link } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { supabaseExt } from "@/integrations/supabase/clientExt";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface ReportSection {
@@ -16,13 +15,12 @@ interface ReportSection {
   type: "positive" | "improvement" | "suggestion";
 }
 
-interface CropReportProps {
-  cropType?: string;
+interface CropAnalysisReportProps {
+  reportId: string;
 }
 
-const CropAnalysisReport: React.FC<CropReportProps> = ({ cropType }) => {
+const CropAnalysisReport: React.FC<CropAnalysisReportProps> = ({ reportId }) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [cropData, setCropData] = useState<any>(null);
   const [reportData, setReportData] = useState<{
@@ -31,14 +29,11 @@ const CropAnalysisReport: React.FC<CropReportProps> = ({ cropType }) => {
     overallScore: number;
     date: string;
   }>({
-    cropType: cropType || "Unknown",
+    cropType: "Unknown",
     sections: [],
     overallScore: 0,
     date: new Date().toLocaleDateString(),
   });
-  
-  // Get report ID from URL if present
-  const reportId = new URLSearchParams(location.search).get('id');
 
   // Resources for different crop types
   const cropResources = {
@@ -115,7 +110,7 @@ const CropAnalysisReport: React.FC<CropReportProps> = ({ cropType }) => {
       }
 
       try {
-        const { data: cropAnalysis, error } = await supabaseExt
+        const { data: cropAnalysis, error } = await supabase
           .from('crop_analysis')
           .select('*')
           .eq('id', reportId)
@@ -183,7 +178,7 @@ const CropAnalysisReport: React.FC<CropReportProps> = ({ cropType }) => {
       });
 
       // Mark report as generated in database
-      await supabaseExt
+      await supabase
         .from('crop_analysis')
         .update({ report_generated: true })
         .eq('id', cropData.id);

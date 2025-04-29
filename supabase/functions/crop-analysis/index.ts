@@ -14,10 +14,35 @@ serve(async (req) => {
   }
 
   try {
-    const { cropData } = await req.json();
+    // Parse request body safely
+    let cropData;
+    try {
+      const body = await req.json();
+      cropData = body.cropData;
+      
+      if (!cropData) {
+        throw new Error('Missing cropData in request body');
+      }
+      
+      console.log("Received crop data:", cropData);
+    } catch (parseError) {
+      console.error("Error parsing request body:", parseError);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: `Invalid request format: ${parseError.message}`
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
     if (!openAIApiKey) {
+      console.error("OPENAI_API_KEY is not set");
       throw new Error('OPENAI_API_KEY is not set');
     }
 
@@ -85,8 +110,8 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: "Failed to parse error response" }));
-      console.error("OpenAI API error:", errorData);
+      const errorText = await response.text();
+      console.error("OpenAI API error response:", errorText);
       throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
     }
 

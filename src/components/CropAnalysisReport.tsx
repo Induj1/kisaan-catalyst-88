@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -144,33 +143,23 @@ const CropAnalysisReport: React.FC<CropAnalysisReportProps> = ({ reportId }) => 
     try {
       console.log("Generating report for crop data:", cropData);
       
-      const response = await fetch(`/functions/crop-analysis`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ cropData }),
+      // Use supabase.functions.invoke instead of direct fetch
+      const { data, error } = await supabase.functions.invoke('crop-analysis', {
+        body: { cropData }
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Error response from crop-analysis function:", errorText);
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
-      }
-      
-      let result;
-      try {
-        result = await response.json();
-      } catch (error) {
-        console.error("Failed to parse JSON response:", error);
-        throw new Error("Failed to parse response from server");
-      }
-      
-      if (!result.success) {
-        throw new Error(result.error || "Failed to generate report");
+      if (error) {
+        console.error("Error from crop-analysis function:", error);
+        throw new Error(`API error: ${error.message || 'Unknown error'}`);
       }
 
-      const aiData = result.data;
+      if (!data || !data.success) {
+        const errorMessage = data?.error || "Failed to generate report";
+        console.error("Error in crop analysis response:", errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      const aiData = data.data;
       console.log("AI generated data:", aiData);
       
       // Build the report sections from the AI response

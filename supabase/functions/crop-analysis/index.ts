@@ -43,7 +43,16 @@ serve(async (req) => {
 
     if (!openAIApiKey) {
       console.error("OPENAI_API_KEY is not set");
-      throw new Error('OPENAI_API_KEY is not set');
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "OpenAI API key is missing. Please set the OPENAI_API_KEY secret in the Supabase project settings."
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     // Construct a more comprehensive and nuanced prompt
@@ -89,83 +98,109 @@ serve(async (req) => {
 
     console.log("Sending request to OpenAI API");
     
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { 
-            role: 'system', 
-            content: 'You are an expert agricultural consultant providing detailed, actionable crop analysis.' 
-          },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.7,
-        response_format: { type: 'json_object' }
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("OpenAI API error response:", errorText);
-      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    
-    if (!data || !data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-      console.error("Invalid or empty response from OpenAI:", data);
-      throw new Error("Invalid response format from OpenAI API");
-    }
-
-    // Parse the AI-generated analysis
-    const analysisText = data.choices[0].message.content;
-    let analysisJson;
-    
     try {
-      analysisJson = JSON.parse(analysisText);
-      
-      // Validate that the JSON has the expected structure
-      if (!analysisJson.positives || !analysisJson.improvements || 
-          !analysisJson.recommendations || !analysisJson.overallScore) {
-        throw new Error("Missing required fields in OpenAI response");
-      }
-    } catch (error) {
-      console.error("Error parsing OpenAI JSON response:", error, "Raw response:", analysisText);
-      
-      // Fallback response if JSON parsing fails
-      analysisJson = {
-        positives: [
-          "Your choice of crop type is appropriate for the region.",
-          "The land size you're working with is adequate for this type of cultivation.",
-          "Your approach shows commitment to agricultural best practices."
-        ],
-        improvements: [
-          "Consider optimizing your watering schedule based on crop needs.",
-          "Review your cultivation method for potential efficiency improvements.", 
-          "Soil testing could provide valuable insights for better outcomes."
-        ],
-        recommendations: [
-          "Implement crop rotation to improve soil health.",
-          "Consider organic alternatives to chemical fertilizers.", 
-          "Monitor weather patterns closely to optimize planting and harvesting times.",
-          "Consult with local agricultural extension services for region-specific advice."
-        ],
-        overallScore: 65
-      };
-    }
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { 
+              role: 'system', 
+              content: 'You are an expert agricultural consultant providing detailed, actionable crop analysis.' 
+            },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.7,
+          response_format: { type: 'json_object' }
+        }),
+      });
 
-    return new Response(JSON.stringify({
-      success: true,
-      data: analysisJson
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    });
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("OpenAI API error response:", errorText);
+        
+        // Check if the error is related to the API key
+        if (response.status === 401) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: "Invalid OpenAI API key. Please check and update your OPENAI_API_KEY in the Supabase project settings."
+            }),
+            {
+              status: 500,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
+        
+        throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data || !data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+        console.error("Invalid or empty response from OpenAI:", data);
+        throw new Error("Invalid response format from OpenAI API");
+      }
+
+      // Parse the AI-generated analysis
+      const analysisText = data.choices[0].message.content;
+      let analysisJson;
+      
+      try {
+        analysisJson = JSON.parse(analysisText);
+        
+        // Validate that the JSON has the expected structure
+        if (!analysisJson.positives || !analysisJson.improvements || 
+            !analysisJson.recommendations || !analysisJson.overallScore) {
+          throw new Error("Missing required fields in OpenAI response");
+        }
+      } catch (error) {
+        console.error("Error parsing OpenAI JSON response:", error, "Raw response:", analysisText);
+        
+        // Fallback response if JSON parsing fails
+        analysisJson = {
+          positives: [
+            "Your choice of crop type is appropriate for the region.",
+            "The land size you're working with is adequate for this type of cultivation.",
+            "Your approach shows commitment to agricultural best practices."
+          ],
+          improvements: [
+            "Consider optimizing your watering schedule based on crop needs.",
+            "Review your cultivation method for potential efficiency improvements.", 
+            "Soil testing could provide valuable insights for better outcomes."
+          ],
+          recommendations: [
+            "Implement crop rotation to improve soil health.",
+            "Consider organic alternatives to chemical fertilizers.", 
+            "Monitor weather patterns closely to optimize planting and harvesting times.",
+            "Consult with local agricultural extension services for region-specific advice."
+          ],
+          overallScore: 65
+        };
+      }
+
+      return new Response(JSON.stringify({
+        success: true,
+        data: analysisJson
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    } catch (openAIError) {
+      console.error('Error calling OpenAI API:', openAIError);
+      return new Response(JSON.stringify({
+        success: false,
+        error: `Error with OpenAI API: ${openAIError.message}`
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
   } catch (error) {
     console.error('Error in crop analysis:', error);
     return new Response(JSON.stringify({

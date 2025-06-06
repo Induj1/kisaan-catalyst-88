@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface GovernmentSchemeProps {
   title: string;
@@ -23,6 +24,11 @@ const GovernmentScheme: React.FC<GovernmentSchemeProps> = ({
   logo,
   link
 }) => {
+  const { language, translate } = useLanguage();
+  
+  // Show description based on current language
+  const displayDescription = language === 'english' ? englishDescription : description;
+  
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
       <CardHeader className="pb-0">
@@ -40,9 +46,8 @@ const GovernmentScheme: React.FC<GovernmentSchemeProps> = ({
           </div>
           <div>
             <CardTitle className="text-lg">{title}</CardTitle>
-            <p className="text-sm text-gray-600 dark:text-gray-400 font-noto">{description}</p>
-            <CardDescription>
-              {englishDescription}
+            <CardDescription className="font-noto">
+              {displayDescription}
             </CardDescription>
           </div>
         </div>
@@ -50,19 +55,19 @@ const GovernmentScheme: React.FC<GovernmentSchemeProps> = ({
       <CardContent className="pt-4 flex-grow">
         <div className="space-y-3">
           <div>
-            <h4 className="text-sm font-medium mb-1">Eligibility:</h4>
+            <h4 className="text-sm font-medium mb-1">{translate('eligibility')}:</h4>
             <p className="text-gray-600 dark:text-gray-400 text-xs">{eligibility}</p>
           </div>
           
           <div>
-            <h4 className="text-sm font-medium mb-1">Benefits:</h4>
+            <h4 className="text-sm font-medium mb-1">{translate('benefits')}:</h4>
             <p className="text-gray-600 dark:text-gray-400 text-xs">{benefits}</p>
           </div>
         </div>
       </CardContent>
       <CardFooter className="pt-3 flex justify-between items-center">
         <p className="text-xs text-gray-500">
-          <span className="font-noto">सभी किसान अपना कागजात तैयार रखे</span>
+          {translate('documentsReady')}
         </p>
         <Button 
           variant="outline" 
@@ -70,7 +75,7 @@ const GovernmentScheme: React.FC<GovernmentSchemeProps> = ({
           className="text-primary hover:bg-primary hover:text-white"
           onClick={() => window.open(link, '_blank')}
         >
-          Apply <ExternalLink size={14} className="ml-1" />
+          {translate('apply')} <ExternalLink size={14} className="ml-1" />
         </Button>
       </CardFooter>
     </Card>

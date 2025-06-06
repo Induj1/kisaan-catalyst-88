@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface TestimonialCardProps {
   name: string;
@@ -24,8 +25,10 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
   rating = 5,
   crop
 }) => {
-  // Use testimony if provided, otherwise use quote
-  const displayQuote = testimony || quote || "";
+  const { language, translate } = useLanguage();
+  
+  // Use testimony if provided, otherwise use quote, and fall back to englishQuote only if current language is English
+  const displayQuote = testimony || quote || (language === 'english' ? englishQuote : "");
   
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
@@ -52,7 +55,6 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
       </CardHeader>
       <CardContent className="pt-4 flex-grow">
         <p className="text-gray-600 dark:text-gray-400 text-sm font-noto mb-3">{displayQuote}</p>
-        {englishQuote && <p className="text-gray-600 dark:text-gray-400 text-xs italic">{englishQuote}</p>}
         {rating && (
           <div className="flex mt-2">
             {[...Array(5)].map((_, i) => (
@@ -66,7 +68,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
         )}
       </CardContent>
       <CardFooter className="text-xs text-gray-500 justify-end border-t pt-3">
-        <span>KisaanMitra user since 2023</span>
+        <span>{translate('userSince')}</span>
       </CardFooter>
     </Card>
   );

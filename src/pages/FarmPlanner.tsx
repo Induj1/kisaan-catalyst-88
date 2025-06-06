@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,6 +12,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import LiveDataWidget from '@/components/LiveDataWidget';
 import MapPlanner from '@/components/MapPlanner';
+import LocationAccessPopup from '@/components/LocationAccessPopup';
 import { supabase } from "@/integrations/supabase/client";
 
 const FarmPlanner = () => {
@@ -23,6 +23,7 @@ const FarmPlanner = () => {
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [locationAccess, setLocationAccess] = useState<boolean>(false);
+  const [showLocationPopup, setShowLocationPopup] = useState(false);
   const [selectedCrop, setSelectedCrop] = useState<string>("");
   const [irrigationBudget, setIrrigationBudget] = useState<string>("");
   const [fertilizerBudget, setFertilizerBudget] = useState<string>("");
@@ -46,47 +47,52 @@ const FarmPlanner = () => {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    // Check if location access is already granted
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLatitude(position.coords.latitude);
-          setLongitude(position.coords.longitude);
-          setLocationAccess(true);
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          setLocationAccess(false);
-        }
-      );
+    // Check for stored location first
+    const storedLat = localStorage.getItem('userLatitude');
+    const storedLng = localStorage.getItem('userLongitude');
+    
+    if (storedLat && storedLng) {
+      setLatitude(parseFloat(storedLat));
+      setLongitude(parseFloat(storedLng));
+      setLocationAccess(true);
+    } else {
+      // Try to get location automatically
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            setLatitude(lat);
+            setLongitude(lng);
+            setLocationAccess(true);
+            
+            // Store in localStorage
+            localStorage.setItem('userLatitude', lat.toString());
+            localStorage.setItem('userLongitude', lng.toString());
+          },
+          (error) => {
+            console.error("Error getting location:", error);
+            setLocationAccess(false);
+          }
+        );
+      }
     }
   }, []);
 
+  const handleLocationGranted = (lat: number, lng: number) => {
+    setLatitude(lat);
+    setLongitude(lng);
+    setLocationAccess(true);
+    setShowLocationPopup(false);
+    
+    toast({
+      title: "स्थान प्राप्त किया गया",
+      description: "आपके स्थान के आधार पर मौसम और मंडी जानकारी अपडेट की गई है",
+    });
+  };
+
   const requestLocationAccess = () => {
-    if (navigator.geolocation) {
-      setIsLoading(true);
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLatitude(position.coords.latitude);
-          setLongitude(position.coords.longitude);
-          setLocationAccess(true);
-          setIsLoading(false);
-          
-          toast({
-            title: "स्थान प्राप्त किया गया",
-            description: "आपके स्थान के आधार पर मौसम और मंडी जानकारी अपडेट की गई है",
-          });
-        },
-        (error) => {
-          setIsLoading(false);
-          toast({
-            variant: "destructive",
-            title: "स्थान प्राप्त करने में विफल",
-            description: "कृपया स्थान की अनुमति प्रदान करें और पुनः प्रयास करें",
-          });
-        }
-      );
-    }
+    setShowLocationPopup(true);
   };
 
   const generateRecommendation = () => {
@@ -427,14 +433,31 @@ const FarmPlanner = () => {
             
             {/* Right Column - Weather and Market Data */}
             <div className="md:col-span-4 space-y-4">
-              <LiveDataWidget widgetType="weather" />
-              <LiveDataWidget widgetType="mandi" />
+              <LiveDataWidget 
+                widgetType="weather" 
+                latitude={latitude}
+                longitude={longitude}
+                onRequestLocation={requestLocationAccess}
+              />
+              <LiveDataWidget 
+                widgetType="mandi" 
+                latitude={latitude}
+                longitude={longitude}
+                onRequestLocation={requestLocationAccess}
+              />
             </div>
           </div>
         </div>
       </main>
       
       <Footer />
+      
+      {/* Location Access Popup */}
+      <LocationAccessPopup
+        open={showLocationPopup}
+        onOpenChange={setShowLocationPopup}
+        onLocationGranted={handleLocationGranted}
+      />
     </div>
   );
 };

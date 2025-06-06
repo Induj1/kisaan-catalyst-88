@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Dialog,
@@ -28,18 +28,10 @@ const LocationAccessPopup: React.FC<LocationAccessPopupProps> = ({
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Request location immediately when popup opens
-  useEffect(() => {
-    if (open) {
-      handleGetLocation();
-    }
-  }, [open]);
-
   const handleGetLocation = () => {
     setIsLoading(true);
     
     if (navigator.geolocation) {
-      // Use high accuracy option to get more precise location
       const options = {
         enableHighAccuracy: true,
         timeout: 10000,
@@ -70,10 +62,20 @@ const LocationAccessPopup: React.FC<LocationAccessPopupProps> = ({
         (error) => {
           console.error("Error getting location:", error);
           
+          let errorMessage = "कृपया स्थान की अनुमति प्रदान करें और पुनः प्रयास करें";
+          
+          if (error.code === error.PERMISSION_DENIED) {
+            errorMessage = "स्थान की अनुमति अस्वीकार कर दी गई। कृपया ब्राउज़र सेटिंग में स्थान की अनुमति दें।";
+          } else if (error.code === error.POSITION_UNAVAILABLE) {
+            errorMessage = "स्थान जानकारी उपलब्ध नहीं है।";
+          } else if (error.code === error.TIMEOUT) {
+            errorMessage = "स्थान प्राप्त करने का समय समाप्त हो गया।";
+          }
+          
           toast({
             variant: "destructive",
             title: "स्थान प्राप्त करने में विफल",
-            description: "कृपया स्थान की अनुमति प्रदान करें और पुनः प्रयास करें",
+            description: errorMessage,
           });
           
           setIsLoading(false);
@@ -127,6 +129,7 @@ const LocationAccessPopup: React.FC<LocationAccessPopupProps> = ({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
+            disabled={isLoading}
           >
             बाद में (Later)
           </Button>
@@ -143,15 +146,6 @@ const LocationAccessPopup: React.FC<LocationAccessPopupProps> = ({
             ) : (
               <>स्थान साझा करें (Share Location)</>
             )}
-          </Button>
-          
-          <Button
-            variant="secondary"
-            onClick={handleGoToFarmPlanner}
-          >
-            फार्म प्लानर पर जाएँ
-            <br />
-            (Go to Farm Planner)
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -39,14 +39,14 @@ serve(async (req) => {
       );
     }
 
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
 
-    if (!openAIApiKey) {
-      console.error("OPENAI_API_KEY is not set");
+    if (!geminiApiKey) {
+      console.error("GEMINI_API_KEY is not set");
       return new Response(
         JSON.stringify({
           success: false,
-          error: "OpenAI API key is missing. Please set the OPENAI_API_KEY secret in the Supabase project settings."
+          error: "Gemini API key is missing. Please set the GEMINI_API_KEY secret in the Supabase project settings."
         }),
         {
           status: 500,
@@ -55,7 +55,7 @@ serve(async (req) => {
       );
     }
 
-    // Construct a more comprehensive and nuanced prompt
+    // Construct a comprehensive prompt for Gemini
     const prompt = `
       As an expert agricultural consultant, provide a detailed, actionable analysis of this crop cultivation data:
 
@@ -96,39 +96,57 @@ serve(async (req) => {
       Note: Provide realistic, data-driven insights based on the specific crop type and cultivation details.
     `;
 
-    console.log("Sending request to OpenAI API");
+    console.log("Sending request to Gemini API");
     
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { 
-              role: 'system', 
-              content: 'You are an expert agricultural consultant providing detailed, actionable crop analysis.' 
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 1,
+            topP: 1,
+            maxOutputTokens: 2048,
+          },
+          safetySettings: [
+            {
+              category: "HARM_CATEGORY_HARASSMENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
             },
-            { role: 'user', content: prompt }
-          ],
-          temperature: 0.7,
-          response_format: { type: 'json_object' }
+            {
+              category: "HARM_CATEGORY_HATE_SPEECH",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            }
+          ]
         }),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("OpenAI API error response:", errorText);
+        console.error("Gemini API error response:", errorText);
         
         // Check if the error is related to the API key
-        if (response.status === 401) {
+        if (response.status === 401 || response.status === 403) {
           return new Response(
             JSON.stringify({
               success: false,
-              error: "Invalid OpenAI API key. Please check and update your OPENAI_API_KEY in the Supabase project settings."
+              error: "Invalid Gemini API key. Please check and update your GEMINI_API_KEY in the Supabase project settings."
             }),
             {
               status: 500,
@@ -137,30 +155,34 @@ serve(async (req) => {
           );
         }
         
-        throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+        throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
       
-      if (!data || !data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-        console.error("Invalid or empty response from OpenAI:", data);
-        throw new Error("Invalid response format from OpenAI API");
+      if (!data || !data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
+        console.error("Invalid or empty response from Gemini:", data);
+        throw new Error("Invalid response format from Gemini API");
       }
 
       // Parse the AI-generated analysis
-      const analysisText = data.choices[0].message.content;
+      const analysisText = data.candidates[0].content.parts[0].text;
       let analysisJson;
       
       try {
-        analysisJson = JSON.parse(analysisText);
+        // Clean the response text to extract JSON
+        const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
+        const cleanedText = jsonMatch ? jsonMatch[0] : analysisText;
+        
+        analysisJson = JSON.parse(cleanedText);
         
         // Validate that the JSON has the expected structure
         if (!analysisJson.positives || !analysisJson.improvements || 
             !analysisJson.recommendations || !analysisJson.overallScore) {
-          throw new Error("Missing required fields in OpenAI response");
+          throw new Error("Missing required fields in Gemini response");
         }
       } catch (error) {
-        console.error("Error parsing OpenAI JSON response:", error, "Raw response:", analysisText);
+        console.error("Error parsing Gemini JSON response:", error, "Raw response:", analysisText);
         
         // Fallback response if JSON parsing fails
         analysisJson = {
@@ -191,11 +213,11 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
-    } catch (openAIError) {
-      console.error('Error calling OpenAI API:', openAIError);
+    } catch (geminiError) {
+      console.error('Error calling Gemini API:', geminiError);
       return new Response(JSON.stringify({
         success: false,
-        error: `Error with OpenAI API: ${openAIError.message}`
+        error: `Error with Gemini API: ${geminiError.message}`
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,

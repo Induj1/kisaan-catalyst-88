@@ -1,1 +1,11 @@
+
 project_id = "cdfndnpqlpifhndfffxd"
+
+[functions.farmer-chat]
+verify_jwt = false
+
+[functions.crop-analysis]
+verify_jwt = false
+
+[functions.crop-recommendations]
+verify_jwt = false

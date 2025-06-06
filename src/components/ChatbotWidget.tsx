@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Mic, MicOff, Volume2, Volume1 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   text: string;
@@ -49,19 +50,8 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
   ]);
   const [input, setInput] = useState('');
   const [isRecording, setIsRecording] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
-  // Mock responses based on keywords
-  const mockResponses = {
-    'मौसम': 'आपके क्षेत्र में अगले 3 दिनों के लिए मौसम पूर्वानुमान यह है: आज - धूप, कल - आंशिक रूप से बादल, परसों - बारिश की संभावना।',
-    'फसल': 'इस मौसम में गेहूं, चना, और सरसों की बुवाई के लिए अच्छा समय है। क्या आप किसी विशेष फसल के बारे में जानकारी चाहते हैं?',
-    'योजना': 'किसानों के लिए प्रमुख सरकारी योजनाएँ हैं: प्रधानमंत्री किसान सम्मान निधि, प्रधानमंत्री फसल बीमा योजना, और किसान क्रेडिट कार्ड। किसी विशेष योजना के बारे में अधिक जानकारी के लिए पूछें।',
-    'बाजार': 'आपके निकटतम मंडी में वर्तमान कीमतें: गेहूं - ₹2150/क्विंटल, धान - ₹3200/क्विंटल, आलू - ₹1200/क्विंटल, प्याज - ₹1800/क्विंटल',
-    'weather': 'The weather forecast for your area for the next 3 days is: Today - Sunny, Tomorrow - Partly Cloudy, Day after - Chance of Rain.',
-    'crop': 'This season is good for planting wheat, chickpeas, and mustard. Would you like information about a specific crop?',
-    'scheme': 'Major government schemes for farmers include: PM Kisan Samman Nidhi, PM Crop Insurance Scheme, and Kisan Credit Card. Ask for more information about a specific scheme.',
-    'market': 'Current prices at your nearest mandi: Wheat - ₹2150/quintal, Rice - ₹3200/quintal, Potato - ₹1200/quintal, Onion - ₹1800/quintal',
-  };
 
   // Auto scroll to bottom when messages change
   useEffect(() => {
@@ -72,7 +62,7 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
   
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!input.trim()) return;
     
     // Add user message
@@ -83,34 +73,54 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
     };
     
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = input;
     setInput('');
+    setIsLoading(true);
     
-    // Simulate "typing" delay
-    setTimeout(() => {
-      // Check if message contains any keywords
-      let botResponse = "मुझे यह समझ नहीं आया। कृपया फसल, मौसम, बाजार या सरकारी योजनाओं के बारे में पूछें।";
+    try {
+      console.log("Sending message to farmer chat:", currentInput);
       
-      if (widgetLanguage === 'english') {
-        botResponse = "I didn't understand that. Please ask about crops, weather, markets, or government schemes.";
-      }
-      
-      // Check for keywords in Hindi and English
-      for (const [keyword, response] of Object.entries(mockResponses)) {
-        if (input.toLowerCase().includes(keyword.toLowerCase())) {
-          botResponse = response;
-          break;
+      const { data, error } = await supabase.functions.invoke('farmer-chat', {
+        body: {
+          message: currentInput,
+          language: widgetLanguage
         }
+      });
+
+      if (error) {
+        console.error("Error calling farmer chat function:", error);
+        throw error;
       }
+
+      if (data?.success && data?.response) {
+        const botMessage = {
+          text: data.response,
+          isBot: true,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, botMessage]);
+      } else {
+        throw new Error("Invalid response from chat service");
+      }
+    } catch (error) {
+      console.error("Error getting AI response:", error);
       
-      // Add bot response
+      // Fallback response
+      const fallbackResponses = {
+        hindi: "मुझे खुशी होगी कि मैं आपकी कृषि संबंधी समस्याओं में मदद कर सकूं। कृपया अपना प्रश्न फिर से पूछें।",
+        english: "I'd be happy to help with your agricultural questions. Please try asking again.",
+        kannada: "ನಿಮ್ಮ ಕೃಷಿ ಪ್ರಶ್ನೆಗಳಿಗೆ ಸಹಾಯ ಮಾಡಲು ನನಗೆ ಸಂತೋಷವಾಗುತ್ತದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಕೇಳಿ."
+      };
+      
       const botMessage = {
-        text: botResponse,
+        text: fallbackResponses[widgetLanguage] || fallbackResponses.hindi,
         isBot: true,
         timestamp: new Date()
       };
-      
       setMessages(prev => [...prev, botMessage]);
-    }, 1000);
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const toggleRecording = () => {
@@ -191,6 +201,22 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
               </div>
             </div>
           ))}
+          
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg rounded-tl-none p-3 max-w-[80%]">
+                <div className="flex items-center space-x-2">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                  <span className="text-sm">सोच रहा हूँ...</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div ref={messagesEndRef} />
         </div>
       </div>
@@ -202,6 +228,7 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
             size="icon"
             className={isRecording ? 'bg-red-100 text-red-600 border-red-300' : ''}
             onClick={toggleRecording}
+            disabled={isLoading}
           >
             {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
           </Button>
@@ -211,6 +238,7 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
             onChange={(e) => setInput(e.target.value)}
             placeholder={getPlaceholder()}
             className="min-h-10 font-noto"
+            disabled={isLoading}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -223,7 +251,7 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
             variant="default" 
             size="icon" 
             onClick={handleSendMessage}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isLoading}
           >
             <Send size={18} />
           </Button>

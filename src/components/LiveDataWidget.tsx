@@ -106,7 +106,7 @@ const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({
   
   const fetchWeatherByLocation = async (lat: number, lng: number) => {
     try {
-      const locationName = await simulateReverseGeocode(lat, lng);
+      const locationName = await reverseGeocode(lat, lng);
       
       const temperature = Math.round(15 + Math.random() * 25);
       const humidity = Math.round(30 + Math.random() * 60);
@@ -141,15 +141,19 @@ const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching weather:", error);
-      setWeatherData(defaultWeatherData);
+      setWeatherData({
+        ...defaultWeatherData,
+        location: `Location (${lat.toFixed(3)}, ${lng.toFixed(3)})`
+      });
       setIsLoading(false);
     }
   };
   
   const fetchNearbyMandi = async (lat: number, lng: number) => {
     try {
-      const locationName = await simulateReverseGeocode(lat, lng);
-      const mandiName = `${locationName.split(',')[0]} Mandi`;
+      const locationName = await reverseGeocode(lat, lng);
+      const cityName = locationName.split(',')[0];
+      const mandiName = `${cityName} Mandi`;
       
       const crops = [
         { 
@@ -191,25 +195,63 @@ const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({
     }
   };
   
-  const simulateReverseGeocode = async (lat: number, lng: number): Promise<string> => {
-    const locations = [
-      "Mumbai, Maharashtra",
-      "Delhi, NCR",
-      "Bangalore, Karnataka",
-      "Chennai, Tamil Nadu",
-      "Kolkata, West Bengal",
-      "Hyderabad, Telangana",
-      "Pune, Maharashtra",
-      "Ahmedabad, Gujarat",
-      "Jaipur, Rajasthan",
-      "Lucknow, Uttar Pradesh"
-    ];
-    
-    const locationIndex = Math.abs(Math.floor((lat * 10) % locations.length));
-    
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    return `Your Location (${locations[locationIndex]})`;
+  const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`,
+        {
+          headers: {
+            'User-Agent': 'FarmerApp/1.0'
+          }
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data && data.display_name) {
+        // Extract meaningful location parts
+        const address = data.address;
+        let locationParts = [];
+        
+        if (address) {
+          // Add city/town/village
+          if (address.city) locationParts.push(address.city);
+          else if (address.town) locationParts.push(address.town);
+          else if (address.village) locationParts.push(address.village);
+          else if (address.hamlet) locationParts.push(address.hamlet);
+          
+          // Add district/county
+          if (address.county && !locationParts.includes(address.county)) {
+            locationParts.push(address.county);
+          }
+          
+          // Add state
+          if (address.state) {
+            locationParts.push(address.state);
+          }
+        }
+        
+        // If we couldn't extract specific parts, use the display name
+        if (locationParts.length === 0) {
+          // Take first 3 parts of display name
+          const displayParts = data.display_name.split(',').slice(0, 3);
+          locationParts = displayParts.map(part => part.trim());
+        }
+        
+        return locationParts.join(', ');
+      }
+      
+      // Fallback if no data
+      return `Location (${lat.toFixed(3)}, ${lng.toFixed(3)})`;
+      
+    } catch (error) {
+      console.error("Error in reverse geocoding:", error);
+      return `Location (${lat.toFixed(3)}, ${lng.toFixed(3)})`;
+    }
   };
 
   const renderLocationPrompt = () => (
